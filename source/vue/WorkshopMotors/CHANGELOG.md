@@ -1,5 +1,13 @@
 # WorkshopMotors -- historial de versiones
 
+## 2.6.8 -- 2026-10-30
+
+- The temperature chart no longer fails in DWC 3.6 (zoom plugin); the side bar scrolls inside when it is taller than the window
+
+## 2.6.7 -- 2026-10-30
+
+- The charts no longer register the zoom plugin for every chart of DWC (it threw an error once a second in the temperature chart of the dashboard)
+
 ## 2.6.6 -- 2026-10-30
 
 - Manifest: sbcRequired true (needs WorkshopService); side bar keeps the group names
