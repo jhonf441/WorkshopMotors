@@ -2,7 +2,7 @@
   "id": "WorkshopMotors",
   "name": "Motors",
   "author": "jhonf441",
-  "version": "2.6.5",
+  "version": "2.6.6",
   "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/jhonf441/WorkshopMotors",
   "tags": [
@@ -13,6 +13,7 @@
   "dwcDependencies": [
     "WorkshopService"
   ],
-  "sbcRequired": false,
+  "sbcRequired": true,
+  "sbcDsfVersion": "3",
   "data": {}
 }

@@ -2,17 +2,35 @@
   "id": "WorkshopMotors",
   "name": "Motors",
   "author": "jhonf441",
-  "version": "2.6.5",
+  "version": "2.6.6",
   "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/jhonf441/WorkshopMotors",
   "tags": [
     "motors",
     "monitor"
   ],
-  "dwcVersion": "3.7",
+  "dwcVersion": "3.6",
   "dwcDependencies": [
     "WorkshopService"
   ],
-  "sbcRequired": false,
-  "data": {}
+  "sbcRequired": true,
+  "sbcDsfVersion": "3.6",
+  "data": {},
+  "sdFiles": [
+    "sys/workshop/macros/axis-limits.g",
+    "sys/workshop/macros/axis-measure.g",
+    "sys/workshop/macros/axis-microstep.g",
+    "sys/workshop/macros/axis-move.g",
+    "sys/workshop/macros/axis-probe.g",
+    "sys/workshop/macros/axis-test.g",
+    "sys/workshop/macros/axis-touch.g",
+    "sys/workshop/macros/crash-cal.g",
+    "sys/workshop/macros/step-ceiling.g"
+  ],
+  "dwcFiles": [
+    "css/WorkshopMotors.1804dd68.css",
+    "css/WorkshopMotors.1804dd68.css.gz",
+    "js/WorkshopMotors.7854b9fc.js",
+    "js/WorkshopMotors.7854b9fc.js.gz"
+  ]
 }

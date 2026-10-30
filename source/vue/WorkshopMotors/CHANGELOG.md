@@ -1,5 +1,9 @@
 # WorkshopMotors -- historial de versiones
 
+## 2.6.6 -- 2026-10-30
+
+- Manifest: sbcRequired true (needs WorkshopService); side bar keeps the group names
+
 ## 2.6.5 -- 2026-10-29
 
 - Steps per revolution of each motor (Advisor column), RPM note says the number used
