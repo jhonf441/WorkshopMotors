@@ -1,0 +1,18 @@
+{
+  "id": "WorkshopMotors",
+  "name": "Motors",
+  "author": "jhonf441",
+  "version": "2.6.5",
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://github.com/jhonf441/WorkshopMotors",
+  "tags": [
+    "motors",
+    "monitor"
+  ],
+  "dwcVersion": "3.6",
+  "dwcDependencies": [
+    "WorkshopService"
+  ],
+  "sbcRequired": false,
+  "data": {}
+}

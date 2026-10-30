@@ -1,0 +1,22 @@
+{
+  "format": "workshop-ceiling-pulses",
+  "version": 2,
+  "note": "Pulse ceiling per motor (kHz) measured on Duet boards. The dc42 rows are his public sheet (Duet 3 MB6HC, RRF 3.2 stable, x256). To add a measurement: Motors page > Measure > Share my measurement (it opens a GitHub issue with the data).",
+  "rows": [
+    {"board": "Duet 3 MB6HC", "firmware": "3.2", "timing": "fast", "motors": 1, "moves": "long", "khz": 83, "source": "dc42"},
+    {"board": "Duet 3 MB6HC", "firmware": "3.2", "timing": "fast", "motors": 3, "moves": "long", "khz": 70, "source": "dc42"},
+    {"board": "Duet 3 MB6HC", "firmware": "3.2", "timing": "fast", "motors": 3, "moves": "short", "khz": 41, "source": "dc42"},
+    {"board": "Duet 3 MB6HC", "firmware": "3.2", "timing": "1", "motors": 1, "moves": "long", "khz": 55, "source": "dc42"},
+    {"board": "Duet 3 MB6HC", "firmware": "3.2", "timing": "1", "motors": 3, "moves": "long", "khz": 51, "source": "dc42"},
+    {"board": "Duet 3 MB6HC", "firmware": "3.2", "timing": "1", "motors": 3, "moves": "short", "khz": 44, "source": "dc42"},
+    {"board": "Duet 3 MB6HC", "firmware": "3.2", "timing": "2.5", "motors": 1, "moves": "long", "khz": 48, "source": "dc42"},
+    {"board": "Duet 3 MB6HC", "firmware": "3.2", "timing": "2.5", "motors": 3, "moves": "long", "khz": 48, "source": "dc42"},
+    {"board": "Duet 3 MB6HC", "firmware": "3.2", "timing": "2.5", "motors": 3, "moves": "short", "khz": 40, "source": "dc42"},
+    {"board": "Duet 3 MB6HC", "firmware": "3.2", "timing": "5", "motors": 1, "moves": "long", "khz": 40, "source": "dc42"},
+    {"board": "Duet 3 MB6HC", "firmware": "3.2", "timing": "5", "motors": 3, "moves": "long", "khz": 40, "source": "dc42"},
+    {"board": "Duet 3 MB6HC", "firmware": "3.2", "timing": "5", "motors": 3, "moves": "short", "khz": 36, "source": "dc42"},
+    {"board": "Duet 3 MB6HC", "firmware": "3.2", "timing": "10", "motors": 1, "moves": "long", "khz": 30, "source": "dc42"},
+    {"board": "Duet 3 MB6HC", "firmware": "3.2", "timing": "10", "motors": 3, "moves": "long", "khz": 30, "source": "dc42"},
+    {"board": "Duet 3 MB6HC", "firmware": "3.2", "timing": "10", "motors": 3, "moves": "short", "khz": 27, "source": "dc42"}
+  ]
+}
