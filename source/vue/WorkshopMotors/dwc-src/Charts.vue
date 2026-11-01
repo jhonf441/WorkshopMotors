@@ -147,7 +147,7 @@
 								<td>
 									<span v-if="!d.state" class="text-medium-emphasis">{{ $t('plugins.WorkshopMotors.common.no_data') }}</span>
 									<v-chip v-else-if="!d.state.alerts.length && !d.state.gstatError" size="x-small" variant="outlined" color="success">{{ $t('plugins.WorkshopMotors.charts.ok') }}</v-chip>
-									<v-chip v-for="a in (d.state ? d.state.alerts : [])" :key="a" size="x-small" variant="outlined" color="warning" class="mr-1">{{ a }}</v-chip>
+									<v-chip v-for="a in (d.state ? d.state.alerts : [])" :key="a" size="x-small" variant="outlined" color="warning" class="mr-1">{{ faultLabel(a) }}</v-chip>
 								</td>
 								<td>
 									<span v-if="!d.alerts.length" class="text-medium-emphasis">{{ $t('plugins.WorkshopMotors.charts.none') }}</span>
@@ -168,7 +168,9 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useTheme } from 'vuetify'
 import { i18n, sendCode } from './dwc-host.js'
 import DetailChart from './DetailChart.vue'
-import { catalog as catalogOf, points, summarySerial, commandsReport, armReport, reportText, reportCsv, nameFile, alertsSince, motorsConfig } from './charts.js'
+import { catalog as catalogOf, points, summarySerial, commandsReport, armReport, alertsSince, motorsConfig } from './charts.js'
+import { exportReport } from './export-files.js'
+import { ts } from './shared-t.js'
 import { historyOf, R } from './record.js'
 import { faultLabel } from './faults.js'
 import { seriesColor, REFERENCE_COLOR } from './chart-data.js'
@@ -351,30 +353,11 @@ async function generate() {
 		progress.value = ''
 	}
 }
+// the report as a file of the exchange standard (CSV, JSON or the text to read: report-file.js)
 function download(kind) {
-	if (!rep.value) {
-		return
+	if (rep.value && !exportReport(kind, rep.value, props.om)) {
+		errorRep.value = ts('exchange_export_failed')
 	}
-	let data
-	let mime
-	if (kind === 'csv') {
-		data = reportCsv(rep.value)
-		mime = 'text/csv'
-	} else if (kind === 'json') {
-		data = JSON.stringify(rep.value, null, 1)
-		mime = 'application/json'
-	} else {
-		data = reportText(rep.value)
-		mime = 'text/plain'
-	}
-	const url = URL.createObjectURL(new Blob([data], { type: mime + ';charset=utf-8' }))
-	const a = document.createElement('a')
-	a.href = url
-	a.download = nameFile('motors', kind, rep.value.generated)
-	document.body.appendChild(a)
-	a.click()
-	document.body.removeChild(a)
-	setTimeout(() => URL.revokeObjectURL(url), 2000)
 }
 </script>
 

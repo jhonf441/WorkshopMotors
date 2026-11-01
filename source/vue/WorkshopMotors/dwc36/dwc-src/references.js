@@ -102,21 +102,20 @@ export function writeCache(storage, table, at) {
 	}
 }
 
-const CSV_COLUMNS = ['board', 'firmware', 'timing', 'motors', 'moves', 'axis', 'micro', 'khz', 'source', 'date'];
+// The CSV of the table (exchange standard, docs-internal/DATA-EXCHANGE.md): one row per row of the table, these columns, in this order.
+// board, firmware, timing, source: texts as the table has them; motors: how many motors moved; moves: 'long' | 'short' (empty for a row typed by hand,
+// whose case is test_case); axis, micro: the axis and the microstepping of a measurement shared from this plugin; khz: the ceiling per motor in kHz;
+// date: when it was measured, as the row says.
+export const CSV_COLUMNS = ['board', 'firmware', 'timing', 'motors', 'moves', 'axis', 'micro', 'khz', 'source', 'date', 'test_case'];
 
-function csvCell(v) {
-	const s = v == null ? '' : String(v);
-	return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
-}
-
-// The rows as a CSV (one line per row, the data columns of the format) for a spreadsheet
+// The rows as the table of the CSV: { columns, rows } for exchangeCsv
 export function tableToCsv(rows) {
-	const lines = [CSV_COLUMNS.join(',')];
-	(rows || []).forEach(r => lines.push(CSV_COLUMNS.map(c => csvCell(r[c])).join(',')));
-	return lines.join('\n') + '\n';
+	return { columns: CSV_COLUMNS, rows: (rows || []).map(r => Object.assign({}, r, { test_case: r.testCase })) };
 }
 
-// The rows as the file of the format (the same one the repository holds), pretty printed
+// The rows as the file of the table: the layout the repository holds (data/references.json), { format, version, rows }, WITHOUT the envelope of
+// the exchange standard. It is a catalog shared by many machines, not the data of one: every copy of the plugin reads it from GitHub and the owner
+// edits it by hand, so it keeps its own versioned layout (docs-internal/DATA-EXCHANGE.md, "Files that keep their own layout").
 export function tableToJson(rows) {
-	return JSON.stringify({ format: FORMAT, version: VERSION, rows: rows || [] }, null, '\t') + '\n';
+	return JSON.stringify({ format: FORMAT, version: VERSION, rows: rows || [] }, null, 2) + '\n';
 }

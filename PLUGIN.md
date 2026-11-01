@@ -85,6 +85,12 @@ Picture 3: "Charts": chooser, quick buttons and period (red rectangles).
 - How: press a period or a layout icon.
 - Watch out: pinch gestures are captured by the chart (the page does not zoom while touching it).
 
+#### Advanced report of all motors
+- What: reads the configuration of every motor from the board (`M350`, `M92`, `M906`, `M203`, `M201`, `M566` and, per driver, `M569` and `M915`: all read only) and joins it with the history and the alerts of the chosen period. A table shows one row per driver. Three downloads: **Text** (to read, in the language of the page), **Spreadsheet (CSV)** and **JSON** (see "Files this page downloads").
+- Where: Charts, below the charts.
+- How: press "Generate report", then the download you want.
+- Watch out: it asks the board a few dozen read-only commands; on a slow board the page says so while it waits.
+
 ![Release](https://raw.githubusercontent.com/jhonf441/WorkshopMotors/main/img/04-release-enable.png)
 
 Picture 4: "Release / enable": the warning, the tick "Understood", and the buttons per axis (red rectangles on the tick and on the lower buttons: not pressed).
@@ -155,7 +161,7 @@ Picture 7: "YOUR board's pulse ceiling" (red rectangles on the axis buttons and 
 #### References to compare
 - What: a table of values from other boards (board, firmware, timing, case, kHz per motor, source); a copy is included in the plugin.
 - Where: Measure, below the button (picture 7, bottom).
-- How: read only.
+- How: read only; "Download CSV" and "Download JSON" save the table as it is shown (see "Files this page downloads").
 
 ![Crash](https://raw.githubusercontent.com/jhonf441/WorkshopMotors/main/img/08-crash-detection-top.png)
 
@@ -244,3 +250,32 @@ Local drivers only; RPM uses the steps per revolution you set for each motor (20
 The "References to compare" table of the Measure tab compares the pulse ceiling you measured with other boards. It comes from ONE file in this repository, [`data/references.json`](data/references.json). The page reads it every time it opens and with the button **Update table**; it keeps the last good copy in the browser, and a copy also travels inside the plugin, so it works with no internet. The line under the table says when it was updated, or that it could not be read (no internet, or the repository is not public yet) and which copy is shown. **Download CSV** and **Download JSON** save the table as it is shown (CSV for a spreadsheet, JSON in the same format as the repository file).
 
 To add your measurement: press **Share my measurement** (it opens an issue already filled with your board, firmware, timing, axis and ceiling in kHz). The owner adds the row to `data/references.json` and everybody gets it the next time the page opens.
+
+## Files this page downloads
+
+Every file is named `<name>-<YYYYMMDD-HHMMSS>.<extension>` (local time of the browser).
+
+**Report, spreadsheet (`workshop-motors-report-...csv`).** UTF-8 with a byte order mark, comma separated, lines end with CRLF. The first row holds the column keys, always in English. One row per driver; a number carries no unit; `true` / `false` for yes / no; an empty cell means no value. A spreadsheet whose list separator is `;` opens it in one column: use its text import (Data, From text/CSV).
+
+| Column | Meaning |
+|---|---|
+| `motor` | Axis letter or extruder (`X`, `E0`) |
+| `board`, `driver` | The driver as RRF names it (`40.1` is board 40, driver 1); apart so a spreadsheet does not read it as a number |
+| `microsteps`, `interpolated` | M350: microstepping and whether it is interpolated |
+| `steps_mm` | M92: steps per mm |
+| `current_ma` | M906: motor current in mA |
+| `max_speed_mm_min`, `accel_mm_s2`, `jerk_mm_min` | M203, M201, M566 |
+| `direction` | `forward` or `backward` (M569) |
+| `mode`, `timing` | M569: driver mode and step pulse timing, as the firmware answers |
+| `m915_s`, `m915_f`, `m915_h` | M915: stall threshold, filter (0 / 1), full steps per second |
+| `measured_max_speed_mm_min`, `max_pulses_hz` | The highest speed seen in the period and the pulse rate it needs |
+| `max_current`, `stallguard_min` | The highest current and the lowest StallGuard value read in the period (the current is in mA on boards that report mA, on the 0-31 scale of the driver otherwise) |
+| `alerts_now`, `alerts_period` | Driver faults now and in the period, as keys separated by spaces (`otpw`, `ot`, `s2ga`...) |
+
+**Report, JSON (`workshop-motors-report-...json`).** An envelope: `format` `workshop-motors-report`, `version` 1, `plugin`, `createdAt` (ISO 8601, UTC), `machine` (`name`, `board`, `firmware`) and `data`. `data` holds `period` (`since`, `until`), `machine`, `motors` (configuration, drivers, measurements and alerts of each), `alerts` and `rrf` (the raw answers of the board). Times are ISO 8601, faults are keys and nothing depends on the language of the page.
+
+**Report, text (`workshop-motors-report-...txt`).** The report to read, in the language of the page. It is not meant to be read by a program.
+
+**References, spreadsheet (`workshop-ceiling-pulses-...csv`).** The same layout, one row per row of the table: `board`, `firmware`, `timing`, `motors`, `moves` (`long` or `short`; empty for a row written by hand), `axis`, `micro`, `khz` (ceiling per motor), `source`, `date`, `test_case` (the case of a row written by hand).
+
+**References, JSON (`workshop-ceiling-pulses-...json`).** The layout of the repository file `data/references.json`: `{ "format": "workshop-ceiling-pulses", "version": 2, "rows": [...] }`, with no envelope. It is a table shared by many machines that the owner edits by hand and every copy of the plugin reads from GitHub, so it keeps its own versioned layout; the download is a file you can compare with the repository one.

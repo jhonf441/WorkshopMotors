@@ -1,5 +1,17 @@
 # WorkshopMotors -- historial de versiones
 
+## 2.6.11 -- 2026-10-31
+
+- Lot 2: one relay client, camera client folder, single gallery, one presence helper, shared resources released at the last plugin, flash for the operator
+
+## 2.6.10 -- 2026-10-31
+
+- Hides what names a plugin that is absent; a plugin is active only by the machine list
+
+## 2.6.9 -- 2026-10-31
+
+- Merged work: config write path, exchange standard, review fixes
+
 ## 2.6.8 -- 2026-10-30
 
 - The temperature chart no longer fails in DWC 3.6 (zoom plugin); the side bar scrolls inside when it is taller than the window

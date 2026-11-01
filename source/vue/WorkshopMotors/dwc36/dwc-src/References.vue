@@ -46,6 +46,7 @@
 				<v-icon left small>mdi-code-json</v-icon>{{ $t('plugins.WorkshopMotors.references.download_json') }}
 			</v-btn>
 			<span class="text-caption grey--text">{{ failed ? $t('plugins.WorkshopMotors.references.update_failed') : (updatedAt ? $t('plugins.WorkshopMotors.references.updated_on', { date: updatedAt.slice(0, 10) }) : '') }}</span>
+			<span v-if="exportMessage" class="text-caption error--text">{{ exportMessage }}</span>
 		</div>
 	</div>
 </template>
@@ -62,7 +63,9 @@ import i18n from '../../i18n'
 // and is read from GitHub. To add a measurement: a notice (issue) with the data.
 // Format and texts of the rows: references.js.
 import REF from './references.json'
-import { readTable, caseText, sourceText, shareRow, timingOf, readCache, writeCache, tableToCsv, tableToJson, TABLE_URL } from './references.js'
+import { readTable, caseText, sourceText, shareRow, timingOf, readCache, writeCache, TABLE_URL } from './references.js'
+import { exportReferences } from './export-files.js'
+import { ts } from './shared-t.js'
 
 const REPO = 'WorkshopMotors';
 const pt = (key, params) => i18n.t('plugins.WorkshopMotors.' + key, params);
@@ -75,7 +78,7 @@ export default {
 	},
 	data() {
 		const cached = readCache(window.localStorage);
-		return { rows: cached ? cached.rows : (readTable(REF) || []), shared: !!cached, updatedAt: cached ? cached.at : null, refreshing: false, failed: false };
+		return { rows: cached ? cached.rows : (readTable(REF) || []), shared: !!cached, updatedAt: cached ? cached.at : null, refreshing: false, failed: false, exportMessage: '' };
 	},
 	computed: {
 		model() {
@@ -116,15 +119,7 @@ export default {
 		},
 		// the table as it is shown now (the shared one or the copy of the plugin) as a file for a spreadsheet or to compare
 		download(kind) {
-			const csv = kind === 'csv';
-			const blob = new Blob([csv ? tableToCsv(this.rows) : tableToJson(this.rows)], { type: csv ? 'text/csv' : 'application/json' });
-			const a = document.createElement('a');
-			a.href = URL.createObjectURL(blob);
-			a.download = 'workshop-pulse-references.' + (csv ? 'csv' : 'json');
-			document.body.appendChild(a);
-			a.click();
-			a.remove();
-			setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+			this.exportMessage = exportReferences(kind, this.rows) ? '' : ts('exchange_export_failed');
 		},
 		caseOf(row) {
 			return caseText(row, pt);

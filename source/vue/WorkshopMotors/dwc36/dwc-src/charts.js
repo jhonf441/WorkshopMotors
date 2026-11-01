@@ -66,10 +66,14 @@ export function kindInfo(kind) {
 	return { unit: k.unitKey ? i18n.t('plugins.WorkshopMotors.' + k.unitKey) : k.unit, gapMs: k.gapMs };
 }
 
+// { name, canAddress } of a board of the object model or of the service report (no text of the page)
+function boardKey(b) {
+	return { name: (b && (b.shortName || b.short_name || b.name)) || '', canAddress: Number(b && (b.canAddress != null ? b.canAddress : b.can_address)) || 0 };
+}
+
 function nameBoard(b) {
-	const can = Number(b && (b.canAddress != null ? b.canAddress : b.can_address)) || 0;
-	const n = (b && (b.shortName || b.short_name || b.name)) || '';
-	return (n ? n + ' ' : '') + (can === 0 ? i18n.t('plugins.WorkshopMotors.charts.main_paren') : '(CAN ' + can + ')');
+	const k = boardKey(b);
+	return (k.name ? k.name + ' ' : '') + (k.canAddress === 0 ? i18n.t('plugins.WorkshopMotors.charts.main_paren') : '(CAN ' + k.canAddress + ')');
 }
 
 // Series that can be charted now: [{ id, kind, group, name, unit, gapMs, limit, limitText, note }]
@@ -413,10 +417,11 @@ export function commandsReport(ids) {
 // "Drive 0 runs forwards, active low enable, timing fast, mode spreadCycle, ccr 0x10053, ..."
 export function readM569(text) {
 	const t = String(text || '');
-	const r = { address: null, mode: null, timing: null, enable: null };
+	const r = { direction: null, address: null, mode: null, timing: null, enable: null };
 	let m = /runs\s+(forwards|backwards|in reverse|reverse)/i.exec(t);
 	if (m) {
-		r.address = /forward/i.test(m[1]) ? i18n.t('plugins.WorkshopMotors.charts.dir_forward') : i18n.t('plugins.WorkshopMotors.charts.dir_backward');
+		r.direction = /forward/i.test(m[1]) ? 'forward' : 'backward';
+		r.address = i18n.t('plugins.WorkshopMotors.charts.dir_' + r.direction);
 	}
 	m = /mode\s+([A-Za-z][A-Za-z ]*?)(?:,|\(|$)/i.exec(t);
 	if (m) {
@@ -496,7 +501,7 @@ export function motorsConfig(om) {
 }
 
 // Everything in the report in one object: { title, generated, since, until, machine, motors: [{ ..., drivers:
-// [{ id, m569, m569Text, m915, state, currentMax, stallGuardMin, alerts }] }], alerts, rrf }
+// [{ id, m569, m569Text, m915, state, currentMax, stallGuardMin, alerts }] }], alerts, rrf }; machine.boards: [{ name, canAddress }]
 export function armReport(op) {
 	const o = op || {};
 	const om = o.om || {};
@@ -515,7 +520,7 @@ export function armReport(op) {
 	const machine = {
 		board: b0.name || b0.shortName || '',
 		firmware: b0.firmwareVersion || '',
-		boards: (om.boards || []).filter(Boolean).map(b => nameBoard(b)),
+		boards: (om.boards || []).filter(Boolean).map(boardKey),
 		kinematics: (om.move && om.move.kinematics && om.move.kinematics.name) || report.kinematics || '',
 		mode: (om.state && om.state.machineMode) || '',
 		state: (om.state && om.state.status) || '',
@@ -545,7 +550,7 @@ export function armReport(op) {
 					m569Text: String(rrf['M569 P' + id] || '').trim(),
 					m915: m915.length ? m915[0] : null,
 					state: d ? {
-						alerts: faultsOfDriver(d).filter(f => f.key !== 'gstat').map(f => faultLabel(f.key)),
+						alerts: faultsOfDriver(d).filter(f => f.key !== 'gstat').map(f => f.key),
 						idle: typeof d.in_standstill === 'boolean' ? d.in_standstill : null,
 						enabled: typeof d.enabled === 'boolean' ? d.enabled : null,
 						current: valueCurrent(d),
@@ -585,7 +590,7 @@ export function reportText(r) {
 	L.push('== ' + i18n.t('plugins.WorkshopMotors.charts.rep_machine') + ' ==');
 	L.push(i18n.t('plugins.WorkshopMotors.charts.rep_board', { board: r.machine.board || '--' }) + (r.machine.firmware ? ' (firmware ' + r.machine.firmware + ')' : ''));
 	if (r.machine.boards.length > 1) {
-		L.push(i18n.t('plugins.WorkshopMotors.charts.rep_boards', { list: r.machine.boards.join(', ') }));
+		L.push(i18n.t('plugins.WorkshopMotors.charts.rep_boards', { list: r.machine.boards.map(nameBoard).join(', ') }));
 	}
 	L.push(i18n.t('plugins.WorkshopMotors.charts.rep_kin_mode_state', { kin: r.machine.kinematics || '--', mode: r.machine.mode || '--', state: r.machine.state || '--' }));
 	if (r.machine.idle && typeof r.machine.idle.factor === 'number') {
@@ -610,7 +615,7 @@ export function reportText(r) {
 				L.push('    ' + i18n.t('plugins.WorkshopMotors.charts.rep_m915', { s: d.m915.s, f: d.m915.filter, h: d.m915.h }));
 			}
 			if (d.state) {
-				L.push('    ' + i18n.t('plugins.WorkshopMotors.charts.rep_now', { alerts: d.state.alerts.length ? i18n.t('plugins.WorkshopMotors.charts.rep_alerts_list', { list: d.state.alerts.join(', ') }) : i18n.t('plugins.WorkshopMotors.charts.rep_no_alerts'), idle: sn(d.state.idle), enabled: sn(d.state.enabled) })
+				L.push('    ' + i18n.t('plugins.WorkshopMotors.charts.rep_now', { alerts: d.state.alerts.length ? i18n.t('plugins.WorkshopMotors.charts.rep_alerts_list', { list: d.state.alerts.map(faultLabel).join(', ') }) : i18n.t('plugins.WorkshopMotors.charts.rep_no_alerts'), idle: sn(d.state.idle), enabled: sn(d.state.enabled) })
 					+ (d.state.current != null ? ' · ' + i18n.t('plugins.WorkshopMotors.charts.rep_current_now', { v: num(d.state.current, 0) }) + (d.state.currentInMa ? ' mA' : ' ' + i18n.t('plugins.WorkshopMotors.charts.rep_scale_0_31')) : '')
 					+ (d.state.gstatError ? ' · ' + i18n.t('plugins.WorkshopMotors.charts.rep_gstat_error') : ''));
 			}
@@ -633,36 +638,4 @@ export function reportText(r) {
 		L.push(String(r.rrf[k] == null ? '' : r.rrf[k]).trim() || i18n.t('plugins.WorkshopMotors.charts.no_response'));
 	}
 	return L.join('\n') + '\n';
-}
-
-function csvField(v) {
-	const s = v === null || v === undefined ? '' : String(v);
-	return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
-}
-
-// One row per driver (for a spreadsheet)
-export function reportCsv(r) {
-	const cab = ['motor', 'driver', 'microsteps', 'interpolated', 'steps_mm', 'current_mA', 'max_speed_mm_min', 'accel_mm_s2', 'jerk_mm_min',
-		'direction', 'mode', 'timing', 'm915_s', 'm915_f', 'm915_h', 'measured_max_speed_mm_min', 'max_pulses_hz', 'max_current', 'stallguard_min',
-		'alerts_now', 'alerts_period'];
-	const rows = [cab.join(',')];
-	for (const m of r.motors) {
-		for (const d of m.drivers) {
-			rows.push([
-				m.key, d.id, m.micro, m.interpolated, m.stepsMm, m.current, m.speedMax, m.accel, m.jerk,
-				d.m569.address, d.m569.mode, d.m569.timing,
-				d.m915 ? d.m915.s : '', d.m915 ? d.m915.filter : '', d.m915 ? d.m915.h : '',
-				m.speedMaxMeasurement == null ? '' : Math.round(m.speedMaxMeasurement), m.pulsesMaxMeasured == null ? '' : Math.round(m.pulsesMaxMeasured),
-				d.currentMax == null ? '' : Math.round(d.currentMax), d.stallGuardMin == null ? '' : d.stallGuardMin,
-				d.state ? d.state.alerts.join(' / ') : '', d.alerts.map(ev => faultLabel(ev.key)).join(' / ')
-			].map(csvField).join(','));
-		}
-	}
-	return rows.join('\n') + '\n';
-}
-
-export function nameFile(prefix, ext, date) {
-	const d = date ? new Date(date) : new Date();
-	const p = n => ('0' + n).slice(-2);
-	return prefix + '-' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '-' + p(d.getHours()) + p(d.getMinutes()) + '.' + ext;
 }

@@ -46,6 +46,7 @@
 				<v-icon start size="small">mdi-code-json</v-icon>{{ $t('plugins.WorkshopMotors.references.download_json') }}
 			</v-btn>
 			<span class="text-body-small text-medium-emphasis">{{ failed ? $t('plugins.WorkshopMotors.references.update_failed') : (updatedAt ? $t('plugins.WorkshopMotors.references.updated_on', { date: updatedAt.slice(0, 10) }) : '') }}</span>
+			<span v-if="exportMessage" class="text-body-small text-error">{{ exportMessage }}</span>
 		</div>
 	</div>
 </template>
@@ -61,7 +62,9 @@
 import { computed, onMounted, ref } from 'vue'
 import { i18n, machineModel } from './dwc-host.js'
 import REF from './references.json'
-import { readTable, caseText, sourceText, shareRow, timingOf, readCache, writeCache, tableToCsv, tableToJson, TABLE_URL } from './references.js'
+import { readTable, caseText, sourceText, shareRow, timingOf, readCache, writeCache, TABLE_URL } from './references.js'
+import { exportReferences } from './export-files.js'
+import { ts } from './shared-t.js'
 
 const REPO = 'WorkshopMotors'
 const pt = (key, params) => i18n.t('plugins.WorkshopMotors.' + key, params)
@@ -78,6 +81,7 @@ const shared = ref(!!cached)
 const updatedAt = ref(cached ? cached.at : null)
 const refreshing = ref(false)
 const failed = ref(false)
+const exportMessage = ref('')
 const model = computed(() => machineModel())
 const board = computed(() => {
 	const b = model.value.boards && model.value.boards[0]
@@ -110,15 +114,7 @@ onMounted(load)
 
 // the table as it is shown now (the shared one or the copy of the plugin) as a file for a spreadsheet or to compare
 function download(kind) {
-	const csv = kind === 'csv'
-	const blob = new Blob([csv ? tableToCsv(rows.value) : tableToJson(rows.value)], { type: csv ? 'text/csv' : 'application/json' })
-	const a = document.createElement('a')
-	a.href = URL.createObjectURL(blob)
-	a.download = 'workshop-pulse-references.' + (csv ? 'csv' : 'json')
-	document.body.appendChild(a)
-	a.click()
-	a.remove()
-	setTimeout(() => URL.revokeObjectURL(a.href), 1000)
+	exportMessage.value = exportReferences(kind, rows.value) ? '' : ts('exchange_export_failed')
 }
 
 function caseOf(row) {

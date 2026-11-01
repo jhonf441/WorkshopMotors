@@ -147,7 +147,7 @@
 								<td>
 									<span v-if="!d.state" class="grey--text">{{ $t('plugins.WorkshopMotors.common.no_data') }}</span>
 									<v-chip v-else-if="!d.state.alerts.length && !d.state.gstatError" x-small outlined color="success">{{ $t('plugins.WorkshopMotors.charts.ok') }}</v-chip>
-									<v-chip v-for="a in (d.state ? d.state.alerts : [])" :key="a" x-small outlined color="warning" class="mr-1">{{ a }}</v-chip>
+									<v-chip v-for="a in (d.state ? d.state.alerts : [])" :key="a" x-small outlined color="warning" class="mr-1">{{ faultLabel(a) }}</v-chip>
 								</td>
 								<td>
 									<span v-if="!d.alerts.length" class="grey--text">{{ $t('plugins.WorkshopMotors.charts.none') }}</span>
@@ -170,7 +170,9 @@ import i18n from '../../i18n'
 
 import { mapActions } from 'vuex'
 import DetailChart from './DetailChart.vue'
-import { catalog as catalog, points, summarySerial, commandsReport, armReport, reportText, reportCsv, nameFile, alertsSince, motorsConfig } from './charts.js'
+import { catalog as catalog, points, summarySerial, commandsReport, armReport, alertsSince, motorsConfig } from './charts.js'
+import { exportReport } from './export-files.js'
+import { ts } from './shared-t.js'
 import { historyOf, R } from './record.js'
 import { faultLabel } from './faults.js'
 import { seriesColor, REFERENCE_COLOR } from './chart-data.js'
@@ -380,30 +382,11 @@ export default {
 				this.progress = '';
 			}
 		},
+		// the report as a file of the exchange standard (CSV, JSON or the text to read: report-file.js)
 		download(kind) {
-			if (!this.rep) {
-				return;
+			if (this.rep && !exportReport(kind, this.rep, this.om)) {
+				this.errorRep = ts('exchange_export_failed');
 			}
-			let data;
-			let mime;
-			if (kind === 'csv') {
-				data = reportCsv(this.rep);
-				mime = 'text/csv';
-			} else if (kind === 'json') {
-				data = JSON.stringify(this.rep, null, 1);
-				mime = 'application/json';
-			} else {
-				data = reportText(this.rep);
-				mime = 'text/plain';
-			}
-			const url = URL.createObjectURL(new Blob([data], { type: mime + ';charset=utf-8' }));
-			const a = document.createElement('a');
-			a.href = url;
-			a.download = nameFile('motors', kind, this.rep.generated);
-			document.body.appendChild(a);
-			a.click();
-			document.body.removeChild(a);
-			setTimeout(() => URL.revokeObjectURL(url), 2000);
 		}
 	}
 };
