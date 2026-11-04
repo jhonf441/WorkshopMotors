@@ -1,5 +1,21 @@
 # WorkshopMotors -- historial de versiones
 
+## 2.6.14 -- 2026-11-03
+
+- Per-motor step pulse frequency charts (calculated from speed and steps per mm)
+
+## Unreleased
+
+- Charts: pulse frequency chart for each motor (kHz, or Hz for a slow motor) and a "Pulses of all" quick button. It is calculated (axis speed x steps/mm), not measured: RRF only measures the sum per board. The measured ceiling is its limit line when known; an axis without steps/mm gets no chart and the page says so
+
+## 2.6.13 -- 2026-11-03
+
+- Charts: more room above the plot so the unit and the top value are clearly apart
+
+## 2.6.12 -- 2026-11-03
+
+- Charts: the unit label no longer overlaps the top value of the Y axis
+
 ## 2.6.11 -- 2026-10-31
 
 - Lot 2: one relay client, camera client folder, single gallery, one presence helper, shared resources released at the last plugin, flash for the operator

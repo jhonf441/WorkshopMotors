@@ -6,6 +6,7 @@
 			<summary>{{ $t('plugins.WorkshopMotors.common.how_it_works') }}</summary>
 		<div class="text-caption grey--text mb-2">
 			{{ $t('plugins.WorkshopMotors.charts.pick_one_or_several_they_use') }}
+			<br>{{ $t('plugins.WorkshopMotors.charts.pulses_help') }}
 		</div>
 		</details>
 		<v-autocomplete
@@ -16,6 +17,7 @@
 			<v-btn x-small outlined @click="addKind(['cruise', 'speed'])">{{ $t('plugins.WorkshopMotors.charts.speed_of_all') }}</v-btn>
 			<v-btn x-small outlined @click="addKind('current')">{{ $t('plugins.WorkshopMotors.charts.current_of_all') }}</v-btn>
 			<v-btn x-small outlined @click="addKind('sg')">{{ $t('plugins.WorkshopMotors.charts.stallguard_of_all') }}</v-btn>
+			<v-btn x-small outlined @click="addQuick('pulses')">{{ $t('plugins.WorkshopMotors.charts.pulses_of_all') }}</v-btn>
 			<v-btn x-small outlined @click="addKind(['boardPulses', 'hiccups', 'vin', 'boardTemp'])">{{ $t('plugins.WorkshopMotors.charts.board_series') }}</v-btn>
 			<v-btn x-small outlined @click="addTodo()">{{ $t('plugins.WorkshopMotors.charts.all') }}</v-btn>
 			<v-btn x-small text @click="sel = []">{{ $t('plugins.WorkshopMotors.charts.remove_all') }}</v-btn>
@@ -28,6 +30,9 @@
 				<v-btn x-small :value="1" :title="$t('plugins.WorkshopMotors.charts.one_per_row')"><v-icon x-small>mdi-view-agenda-outline</v-icon></v-btn>
 				<v-btn x-small :value="2" :title="$t('plugins.WorkshopMotors.charts.two_per_row')"><v-icon x-small>mdi-view-grid-outline</v-icon></v-btn>
 			</v-btn-toggle>
+		</div>
+		<div v-if="missingSteps.length" class="text-caption grey--text mt-1">
+			{{ $t('plugins.WorkshopMotors.charts.pulses_missing_steps', { names: missingSteps.join(', ') }) }}
 		</div>
 		<div v-if="historyShort" class="text-caption grey--text mt-1">
 			{{ $t('plugins.WorkshopMotors.charts.data_since_min', { n: minutesData }) }}
@@ -170,7 +175,7 @@ import i18n from '../../i18n'
 
 import { mapActions } from 'vuex'
 import DetailChart from './DetailChart.vue'
-import { catalog as catalog, points, summarySerial, commandsReport, armReport, alertsSince, motorsConfig } from './charts.js'
+import { catalog as catalog, points, summarySerial, scalePoints, scaleSummary, pulsesMissing, quickIds, commandsReport, armReport, alertsSince, motorsConfig } from './charts.js'
 import { exportReport } from './export-files.js'
 import { ts } from './shared-t.js'
 import { historyOf, R } from './record.js'
@@ -243,6 +248,9 @@ export default {
 			void R.tick;
 			return alertsSince(historyOf.alerts, this.since).slice().reverse();
 		},
+		missingSteps() {
+			return pulsesMissing(this.report, this.om);
+		},
 		itemsSelector() {
 			const out = [];
 			let group = null;
@@ -265,8 +273,8 @@ export default {
 			this.catalog.forEach(s => { byId[s.id] = s; });
 			return (this.sel || []).filter(id => byId[id]).map(id => ({
 				serial: byId[id],
-				pts: points(historyOf.h, id, this.since, 600),
-				summary: summarySerial(historyOf.h, id, this.since)
+				pts: scalePoints(points(historyOf.h, id, this.since, 600), byId[id].scale),
+				summary: scaleSummary(summarySerial(historyOf.h, id, this.since), byId[id].scale)
 			}));
 		},
 		minutesData() {
@@ -335,6 +343,9 @@ export default {
 			const ts = Array.isArray(kinds) ? kinds : [kinds];
 			const nuevos = this.catalog.filter(s => ts.indexOf(s.kind) >= 0).map(s => s.id);
 			this.sel = Array.from(new Set((this.sel || []).concat(nuevos)));
+		},
+		addQuick(buttonId) {
+			this.sel = Array.from(new Set((this.sel || []).concat(quickIds(this.catalog, buttonId))));
 		},
 		addTodo() {
 			this.sel = this.catalog.map(s => s.id);

@@ -18,6 +18,9 @@ import i18n from '../../i18n'
 //                   CS_ACTUAL 0-31 scale when it cannot estimate; at rest it drops to the idle current
 //   StallGuard min  "SG min" of M122: the lowest load margin of the driver since the previous reading (~5 s);
 //                   0 = stalled; only valid in spreadCycle and above a minimum speed
+//   motor pulses    CALCULATED, not measured: |axis speed| x steps/mm of the axis (move.axes[].stepsPerMm, already
+//                   microstepped), stored in Hz with the clock of the speed sample; RRF only measures the sum per board
+//                   (M122), so the chart says so and draws the ceiling measured per motor (Measure) as its line
 //   board pulses    steps per second of the board: the sum over its drivers (the measured ceiling is the line)
 //   late pulses     new M122 "hiccups" per reading (delays the step generator inserted)
 //   MCU temperature boards[].mcuTemp (C)           supply voltage  boards[].vIn (V): the motors' supply
@@ -55,6 +58,7 @@ const KINDS = {
 	speed: { unit: 'mm/s', gapMs: 5000 },
 	current: { unit: 'mA', gapMs: 15000 },
 	sg: { unitKey: 'charts.unit_sg', gapMs: 15000 },
+	pulses: { unit: 'kHz', gapMs: 5000 },
 	boardPulses: { unit: 'kHz', gapMs: 5000 },
 	hiccups: { unitKey: 'charts.unit_count', gapMs: 15000 },
 	boardTemp: { unit: '°C', gapMs: 5000 },
@@ -66,6 +70,87 @@ export function kindInfo(kind) {
 	return { unit: k.unitKey ? i18n.t('plugins.WorkshopMotors.' + k.unitKey) : k.unit, gapMs: k.gapMs };
 }
 
+// ---- Step pulses of a motor (calculated) ----
+
+// Steps per mm of the motor labelled `label` (an axis letter or 'E<n>') in the object model, already microstepped
+// (move.axes[].stepsPerMm / move.extruders[].stepsPerMm). null when the model does not have a usable number.
+export function stepsPerMmOf(om, label) {
+	const move = (om && om.move) || {};
+	let x = null;
+	const ext = /^E(\d+)$/.exec(String(label || ''));
+	if (ext) {
+		x = (move.extruders || [])[Number(ext[1])] || null;
+	} else {
+		x = (move.axes || []).find(a => a && a.letter === label) || null;
+	}
+	const v = x ? x.stepsPerMm : null;
+	return typeof v === 'number' && isFinite(v) && v > 0 ? v : null;
+}
+
+// Step pulses per second a motor generates at `speedMmS` (mm/s, either direction) with `stepsPerMm`: |v| x steps/mm.
+// null without a usable steps/mm or speed (never a division: a missing steps/mm gives no datum, not 0).
+export function pulsesHz(speedMmS, stepsPerMm) {
+	if (typeof speedMmS !== 'number' || !isFinite(speedMmS) || typeof stepsPerMm !== 'number' || !isFinite(stepsPerMm) || stepsPerMm <= 0) {
+		return null;
+	}
+	return Math.abs(speedMmS) * stepsPerMm;
+}
+
+// Unit of a pulse chart and the factor from the stored Hz: kHz like the board chart, or Hz for a motor that never
+// reaches 1 kHz (maxHz = M203 x steps/mm: a slow axis at 800 Hz would be a flat 0.8 on a kHz axis). Unknown max: kHz.
+export function pulseUnit(maxHz) {
+	if (typeof maxHz === 'number' && isFinite(maxHz) && maxHz > 0 && maxHz < 1000) {
+		return { unit: 'Hz', scale: 1 };
+	}
+	return { unit: 'kHz', scale: 0.001 };
+}
+
+// The points / summary of a series in the unit of its chart (scale = catalog entry's factor; 1 or missing: as stored)
+export function scalePoints(pts, scale) {
+	if (!(typeof scale === 'number') || scale === 1) {
+		return pts;
+	}
+	return (pts || []).map(p => ({ t: p.t, y: p.y * scale }));
+}
+
+export function scaleSummary(s, scale) {
+	if (!s || !(typeof scale === 'number') || scale === 1) {
+		return s;
+	}
+	return Object.assign({}, s, { min: s.min * scale, max: s.max * scale, avg: s.avg * scale, last: s.last === null ? null : s.last * scale });
+}
+
+// The CAN address of the board the service runs on (the one Measure measured); 0 when the report does not say
+function localCanAddress(report) {
+	const b = ((report && report.boards) || []).find(x => x && x.is_local);
+	return b && b.can_address != null ? Number(b.can_address) : 0;
+}
+
+// '40.1' -> 40, '0.3' -> 0 (the board part of a driver id of the report)
+function canOfDriver(id) {
+	const s = String(id || '');
+	return s.indexOf('.') >= 0 ? Number(s.split('.')[0]) : 0;
+}
+
+// ---- Quick buttons of the Charts section ----
+
+// Each button adds every series of its kinds to the selection (Charts.vue draws them in this order). label: a key
+// relative to plugins.WorkshopMotors. "Pulses of all" puts the calculated pulses of each motor next to the measured
+// pulses of each board: what a motor asks for against what the board generates in total.
+export const QUICK_BUTTONS = [
+	{ id: 'speed', label: 'charts.speed_of_all', kinds: ['cruise', 'speed'] },
+	{ id: 'current', label: 'charts.current_of_all', kinds: ['current'] },
+	{ id: 'sg', label: 'charts.stallguard_of_all', kinds: ['sg'] },
+	{ id: 'pulses', label: 'charts.pulses_of_all', kinds: ['pulses', 'boardPulses'] },
+	{ id: 'board', label: 'charts.board_series', kinds: ['boardPulses', 'hiccups', 'vin', 'boardTemp'] }
+];
+
+// The series ids of the catalog `list` that the quick button `buttonId` adds ([] for an unknown button)
+export function quickIds(list, buttonId) {
+	const b = QUICK_BUTTONS.find(x => x.id === buttonId);
+	return b ? (list || []).filter(s => s && b.kinds.indexOf(s.kind) >= 0).map(s => s.id) : [];
+}
+
 // { name, canAddress } of a board of the object model or of the service report (no text of the page)
 function boardKey(b) {
 	return { name: (b && (b.shortName || b.short_name || b.name)) || '', canAddress: Number(b && (b.canAddress != null ? b.canAddress : b.can_address)) || 0 };
@@ -74,6 +159,11 @@ function boardKey(b) {
 function nameBoard(b) {
 	const k = boardKey(b);
 	return (k.name ? k.name + ' ' : '') + (k.canAddress === 0 ? i18n.t('plugins.WorkshopMotors.charts.main_paren') : '(CAN ' + k.canAddress + ')');
+}
+
+// Labels of the motors of the report whose steps/mm the object model does not give: they get no pulse chart
+export function pulsesMissing(report, om) {
+	return ((report && report.entries) || []).filter(e => e && e.label && !stepsPerMmOf(om, e.label)).map(e => e.label);
 }
 
 // Series that can be charted now: [{ id, kind, group, name, unit, gapMs, limit, limitText, note }]
@@ -94,6 +184,18 @@ export function catalog(report, om, ceiling) {
 		add('axis:' + e.label + ':speed', 'speed', group, t('speed_of_name', { name: e.label }), {
 			limit: e.max_speed_mm_min ? e.max_speed_mm_min / 60 : null, limitText: i18n.t('plugins.WorkshopMotors.common.maximum_m203'), note: t('speed_note')
 		});
+		const spm = stepsPerMmOf(om, e.label);
+		if (spm) {
+			const maxHz = e.max_speed_mm_min ? e.max_speed_mm_min / 60 * spm : null;
+			const pu = pulseUnit(maxHz);
+			const local = localCanAddress(report);
+			const onLocal = (e.drivers || []).length > 0 && (e.drivers || []).every(d => d && canOfDriver(d.id) === local);
+			const khz = ceiling && (ceiling.khz_per_motor > 0 ? ceiling.khz_per_motor : ceiling.khz_board > 0 ? ceiling.khz_board : 0);
+			add('axis:' + e.label + ':pulses', 'pulses', group, t('pulses_of_name', { name: e.label }), {
+				unit: pu.unit, scale: pu.scale,
+				limit: onLocal && khz ? khz * 1000 * pu.scale : null, limitText: t('measured_ceiling'), note: t('motor_pulses_note')
+			});
+		}
 		for (const d of e.drivers || []) {
 			if (!d || !d.id) {
 				continue;
@@ -161,6 +263,8 @@ export function sample(report, om, last) {
 				continue;
 			}
 			put('axis:' + e.label + ':speed', (e.current_speed_mm_min || 0) / 60);
+			// calculated in Hz (no datum without steps/mm); the chart scales it to its unit
+			put('axis:' + e.label + ':pulses', pulsesHz((e.current_speed_mm_min || 0) / 60, stepsPerMmOf(om, e.label)));
 			for (const d of e.drivers || []) {
 				if (fresh && d && d.id) {
 					put('drv:' + d.id + ':current', valueCurrent(d));
