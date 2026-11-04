@@ -1,5 +1,9 @@
 # WorkshopMotors -- historial de versiones
 
+## 2.6.15 -- 2026-11-04
+
+- Start-up card locked without a session; shared help tip; session chip class
+
 ## 2.6.14 -- 2026-11-03
 
 - Per-motor step pulse frequency charts (calculated from speed and steps per mm)
