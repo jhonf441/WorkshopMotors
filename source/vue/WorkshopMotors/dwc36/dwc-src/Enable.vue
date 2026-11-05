@@ -11,9 +11,10 @@
 			<v-checkbox v-model="understood" dense hide-details class="mt-1 mb-0 pt-0" :disabled="lock.blocked" :label="e('understood_i_will_release_the_motors')" />
 		</v-alert>
 
-		<v-alert v-if="releaseLock" dense outlined type="info" class="mb-3">{{ releaseLock }}</v-alert>
-		<v-alert v-if="lock.blocked" dense outlined type="warning" class="mb-3">{{ lock.reason }}</v-alert>
-		<div v-if="textIdle" class="text-caption enabled-faint mb-2">{{ textIdle }}</div>
+		<!-- ONE reason for the buttons of the page that the person cannot press (no session / role): enabling is an operator's, releasing a technician's -->
+		<lock-reason :min="lockNeed" class="mb-3" />
+		<div v-if="lock.blocked" class="wf-note is-warn mb-3" role="note"><v-icon :size="16" class="wf-note-icon" aria-hidden="true">mdi-alert-outline</v-icon><span>{{ lock.reason }}</span></div>
+		<div v-if="textIdle" class="wf-note is-info mb-2" role="note"><v-icon :size="16" class="wf-note-icon" aria-hidden="true">mdi-information-outline</v-icon><span>{{ textIdle }}</span></div>
 
 		<div class="enabled-grid">
 			<div v-for="m in motors" :key="m.key" class="enabled-card" :class="'enabled-' + m.state">
@@ -103,9 +104,9 @@
 			</div>
 		</div>
 
-		<div v-if="!understood && !lock.blocked" class="text-caption enabled-faint mt-2">{{ e('to_release_first_tick_understood') }}</div>
+		<div v-if="!understood && !lock.blocked" class="wf-note is-info mt-2" role="note"><v-icon :size="16" class="wf-note-icon" aria-hidden="true">mdi-information-outline</v-icon><span>{{ e('to_release_first_tick_understood') }}</span></div>
 		<div v-if="busy" class="text-caption mt-2">{{ e('sending') }}</div>
-		<v-alert v-if="result" dense outlined :type="result.ok ? 'success' : 'error'" class="mt-2 mb-0">{{ result.text }}</v-alert>
+		<outcome-note v-if="result" :text="result.text" :kind="result.kind || ''" :type="result.ok ? 'success' : 'error'" class="mt-2" />
 
 		<div class="mt-2 d-flex align-center text-body-2" style="gap:4px">
 			<span>{{ e('what_can_and_cannot_be_done') }}</span>
@@ -138,12 +139,15 @@ import { motorsOf, block, command, notices, textIdle, noticesLevel4, tap, canUse
 import { ENABLE_COLOR, ENABLE_ICON } from './motor-state.js'
 import { sendMotors, ANSWER_MS } from './motors-send.js'
 import { roleMixin } from './role-mixin.js' // what the role may do (vue/_shared)
-import { signedOut } from './workshop-auth.js'
 import HelpTip from './HelpTip.vue' // vue/_shared36
+import LockReason from './LockReason.vue' // vue/_shared36
+import OutcomeNote from './OutcomeNote.vue'
 
 export default {
-	components: { HelpTip },
+	components: { HelpTip, LockReason, OutcomeNote },
 	mixins: [roleMixin],
+	// the person who left leaves no selection, armed tap, ticked box or result behind (ESTANDAR 3)
+	sessionData: ['sel', 'armed', 'result', 'understood', 'waiting'],
 	props: {
 		report: { type: Object, default: null },
 		om: { type: Object, required: true },
@@ -175,11 +179,9 @@ export default {
 		selMotors() {
 			return this.motors.filter(m => this.sel.indexOf(m.key) >= 0);
 		},
-		// why releasing is locked for this person, told apart by cause: no session (signing in fixes it) or a role below technician
-		releaseLock() {
-			const why = this.lockText('technician');
-			if (!why) return '';
-			return signedOut() ? why : this.e('role_cannot_release') + ' ' + why;
+		// the role the buttons of the page still wait for: enabling is an operator's, releasing a technician's (the reason names it)
+		lockNeed() {
+			return this.atLeast('operator') ? 'technician' : 'operator';
 		},
 		canRelease() {
 			return this.atLeast('technician') && canUse('disable', this.lock, this.understood, this.busy);
@@ -283,7 +285,7 @@ export default {
 			const r = await sendMotors(apiTextKeepRefusals, action, keys);
 			this.busy = false;
 			if (!r.ok) {
-				this.result = { ok: false, text: r.error };
+				this.result = { ok: false, text: r.error, kind: r.kind || '' };
 				return;
 			}
 			const list = keys || this.motors.map(m => m.key);
@@ -382,8 +384,8 @@ export default {
 	border-radius: 4px;
 }
 .enabled-notices-armed {
-	border-left-color: #ff8f00;
-	background: rgba(255, 143, 0, 0.12);
+	border-left-color: var(--wf-armed, #ff8f00);
+	background: color-mix(in srgb, var(--wf-armed, #ff8f00) 12%, transparent);
 }
 .enabled-notices ul {
 	margin: 2px 0 0;

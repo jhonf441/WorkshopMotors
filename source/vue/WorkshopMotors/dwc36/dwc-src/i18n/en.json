@@ -535,8 +535,7 @@
 		"release_all": "Release all",
 		"if_you_release_the_selection": "If you release the selection",
 		"to_release_first_tick_understood": "To release, first tick \"Understood\" above.",
-		"power_off_nothing_to_do": "The motor power supply is off: no motor has force. Releasing or enabling does nothing (and releasing would remove the homing).",
-		"role_cannot_release": "Your role can enable motors but not release them: releasing is for a technician or the administrator."
+		"power_off_nothing_to_do": "The motor power supply is off: no motor has force. Releasing or enabling does nothing (and releasing would remove the homing)."
 	},
 	"measure": {
 		"waiting_for_an_m122_reading": "Waiting for an M122 reading...",
@@ -744,7 +743,6 @@
 		"service_not_running": "is not running (Settings > Plugins)",
 		"service_sign_in": "needs you to sign in to be checked",
 		"service_role": "your role cannot check it: a technician is needed",
-		"locked": "Not signed in: sign in to create or change files from here.",
 		"row_drivers": "Motor drivers",
 		"row_drivers_tip": "The service reads the Duet drivers (M122, M569) while this screen is open. With no drivers in config.g there is nothing to show.",
 		"drivers_ok": "{drivers} drivers on {axes} axes",

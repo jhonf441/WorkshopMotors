@@ -86,7 +86,7 @@
 		<div class="text-caption grey--text mt-1">
 			{{ $t('plugins.WorkshopMotors.axesTest.clear_the_work_area_and_keep') }}
 		</div>
-		<v-alert v-if="resultMsg" dense outlined :type="resultKind" class="mt-3 mb-0">{{ resultMsg }}</v-alert>
+		<outcome-note :text="resultMsg || ''" :kind="resultRefusalKind" :type="resultKind" class="mt-3" />
 
 		<!-- History -->
 		<div class="d-flex align-center mt-4 mb-1">
@@ -124,7 +124,8 @@ import i18n from '../../i18n'
 
 import { mapActions } from 'vuex'
 import { reserveMotion } from './workshop-api.js'
-import { sequenceBlock, withReservation, refusedText } from './sequence.js'
+import { sequenceBlock, withReservation, refusedText, refusedOf } from './sequence.js'
+import OutcomeNote from './OutcomeNote.vue'
 
 export const THRESHOLD_MM = 0.1;
 // Step-loss threshold per axis: with a switch (G1 H4) ~0.1 mm; Z is measured
@@ -135,6 +136,7 @@ export function thresholdAxis(axis) {
 }
 
 export default {
+	components: { OutcomeNote },
 	props: {
 		axes: { type: Array, default: () => [] },
 		state: { type: String, default: '' },
@@ -162,11 +164,16 @@ export default {
 			stepCurrent: 0,
 			stopRequest: false,
 			resultMsg: null,
+			refused: null, // the refusal of the last test with its cause (sequence.js refusedOf)
 			resultKind: 'info',
 			restoring: false
 		};
 	},
 		computed: {
+			// the cause of the refusal that is the message now ('' = not a refusal of the session or the role)
+			resultRefusalKind() {
+				return this.refused && this.refused.text === this.resultMsg ? this.refused.kind : '';
+			},
 			// Request 2026-10-09: "what if the motor tests include
 			// Z and new motors that get assigned": the list comes from the machine.
 			// switch = physical limit switch (any axis, min or max);
@@ -393,6 +400,7 @@ export default {
 				}
 			} catch (e) {
 				this.resultKind = 'error';
+				this.refused = refusedOf(e);
 				this.resultMsg = refusedText(e) || i18n.t('plugins.WorkshopMotors.common.the_test_was_interrupted') + (e.message || e);
 			} finally {
 				this.running = false;

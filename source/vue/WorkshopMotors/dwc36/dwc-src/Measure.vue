@@ -44,7 +44,7 @@
 				<v-progress-circular indeterminate size="16" width="2" class="mr-1" />{{ stateT }}
 			</span>
 		</div>
-		<v-alert v-if="msgT" dense outlined :type="kindT" class="mt-3 mb-0">{{ msgT }}</v-alert>
+		<outcome-note :text="msgT || ''" :kind="msgRefusalKind" :type="kindT" class="mt-3" />
 		<div v-if="ceiling" class="mt-3 text-body-2">
 			<b>{{ $t('plugins.WorkshopMotors.measure.measured') }}</b> {{ $t('plugins.WorkshopMotors.measure.khz_per_motor_value', { khz: ceiling.khz_per_motor }) }}
 			<span class="grey--text">
@@ -127,7 +127,8 @@ import { mapActions } from 'vuex'
 import References from './References.vue'
 import { reserveMotion } from './workshop-api.js'
 import { settings } from './settings.js' // shared settings files with revision (vue/_shared): .bak and "another person changed this"
-import { sequenceBlock, withReservation, refusedText } from './sequence.js'
+import { sequenceBlock, withReservation, refusedText, refusedOf } from './sequence.js'
+import OutcomeNote from './OutcomeNote.vue'
 import HelpTip from './HelpTip.vue' // vue/_shared36
 
 export const CEILING_FILE = '0:/sys/workshop/config/step-ceiling.json';
@@ -171,7 +172,7 @@ function saveIdleLeft(v) {
 }
 
 export default {
-	components: { HelpTip, References },
+	components: { HelpTip, References, OutcomeNote },
 	props: {
 		axes: { type: Array, default: () => [] },
 		state: { type: String, default: '' },
@@ -193,6 +194,7 @@ export default {
 			stopT: false,
 			stateT: '',
 			msgT: null,
+			refused: null, // the refusal behind `msgT`, with its cause (sequence.js refusedOf)
 			kindT: 'info',
 			restoring: false,
 			armedDelete: false,
@@ -209,6 +211,10 @@ export default {
 		};
 	},
 	computed: {
+		// the cause of the refusal that is the message now ('' = not a refusal of the session or the role)
+		msgRefusalKind() {
+			return this.refused && this.refused.text === this.msgT ? this.refused.kind : '';
+		},
 		busy() {
 			return !!sequenceBlock(this.$store.state.machine.model) || ['processing', 'paused', 'pausing', 'resuming', 'simulating'].includes(this.state);
 		},
@@ -372,6 +378,7 @@ export default {
 				}
 			} catch (e) {
 				this.kindT = 'error';
+				this.refused = refusedOf(e);
 				this.msgT = refusedText(e) || i18n.t('plugins.WorkshopMotors.measure.measurement_interrupted_error', { error: e.message || String(e) });
 			} finally {
 				this.runningT = false;

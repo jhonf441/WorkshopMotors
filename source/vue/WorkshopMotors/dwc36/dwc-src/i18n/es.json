@@ -535,8 +535,7 @@
 		"release_all": "Soltar todos",
 		"if_you_release_the_selection": "Si sueltas lo elegido",
 		"to_release_first_tick_understood": "Para soltar, primero tilda \"Entendido\" arriba.",
-		"power_off_nothing_to_do": "La fuente de los motores está apagada: ningún motor tiene fuerza. Ni soltar ni habilitar tiene efecto (y soltar borraría el homing).",
-		"role_cannot_release": "Tu rol puede habilitar motores pero no liberarlos: liberar es de un tecnico o del administrador."
+		"power_off_nothing_to_do": "La fuente de los motores está apagada: ningún motor tiene fuerza. Ni soltar ni habilitar tiene efecto (y soltar borraría el homing)."
 	},
 	"measure": {
 		"waiting_for_an_m122_reading": "Esperando una lectura de M122...",
@@ -744,7 +743,6 @@
 		"service_not_running": "no está en marcha (Ajustes > Complementos)",
 		"service_sign_in": "hace falta iniciar sesión para comprobarlo",
 		"service_role": "tu rol no puede comprobarlo: hace falta técnico",
-		"locked": "Sin sesión: inicia sesión para crear o cambiar archivos desde aquí.",
 		"row_drivers": "Drivers de los motores",
 		"row_drivers_tip": "El servicio lee los drivers de la Duet (M122, M569) mientras esta pantalla está abierta. Sin drivers en config.g no hay nada que mostrar.",
 		"drivers_ok": "{drivers} drivers en {axes} ejes",

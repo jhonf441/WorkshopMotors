@@ -85,6 +85,8 @@ function readSection() {
 
 export default {
 	mixins: [roleMixin],
+	// what the files of the machine gave to the person who left (the step ceiling, the saved tests, the macros) is read again for the new one (ESTANDAR 3)
+	sessionData: ['ceiling', 'tests', 'chartsPreselect', 'startupMacros'],
 	components: { PageHeader, ControlHolderChip, ServiceNotice, StartupPanel, SideTabs, HiddenNote, StateSection, DetailsSection, ChartsSection, AdvisorSection, EnableSection, AxesTest, MeasureSection, CrashSection, ReleasedBand },
 	data() {
 		return {
@@ -234,6 +236,7 @@ export default {
 		onSessionChange() {
 			this.loadCeiling();
 			this.loadTests();
+			this.loadMacrosStartup();
 		},
 		heartbeat() {
 			if (document.hidden || !this.$el || this.$el.isConnected === false) return;

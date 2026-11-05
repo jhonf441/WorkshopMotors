@@ -10,7 +10,8 @@ import i18n from '../../i18n'
 import { machineFree, ownerMotion } from './machine-free.js'
 import { ts } from './shared-t.js'
 import { serviceText, serviceDefaultKey } from './service-text.js'
-import { deviceId } from './workshop-auth.js'
+import { deviceId, workshopRole } from './workshop-auth.js'
+import { noticeText } from './notice-kind.js'
 
 export const ORIGIN = 'WorkshopMotors';
 export const RESERVE_S = 120; // a reservation lasts this long unless renewed
@@ -79,11 +80,21 @@ export async function withReservation(reserveMotion, text, fn, timers) {
 
 // A sequence refused before it started says so (not "interrupted": nothing moved). '' for any other error.
 // The cause is told apart: motion_denied (somebody else holds the movement), no session (401: signing in fixes it) or a role too
-// low (403: its own message says the role that is needed).
+// low (403: the standard sentence names the role that is needed and the current one).
 export function refusedText(e) {
 	const code = e && e.code;
 	if (code === 'motion_denied') return i18n.t('plugins.WorkshopMotors.common.not_started', { reason: e.message || '' });
-	if (code === 'login_required') return ts('lock_signed_out');
-	if (code === 'forbidden') return (e.message ? String(e.message) : '') || ts('err_role');
+	if (code === 'login_required') return ts('notice_session_reason');
+	// the commissioning sequences are a technician's: the sentence names that role and the one the person has
+	if (code === 'forbidden') return noticeText('role', { needed: 'technician', role: workshopRole() }, ts);
 	return '';
+}
+
+// The same refusal with its CAUSE, for <outcome-note>: { kind: 'session' | 'role' | '' ('' = somebody else holds the movement), text } or null
+// when the error is not a refusal. A refusal of the session or the role is a calm note of its cause, never the red error of the test.
+export function refusedOf(e) {
+	const text = refusedText(e);
+	if (!text) return null;
+	const code = e && e.code;
+	return { kind: code === 'login_required' ? 'session' : code === 'forbidden' ? 'role' : '', text };
 }

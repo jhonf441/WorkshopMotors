@@ -1,9 +1,6 @@
 <template>
 	<div>
-		<details class="wf-more">
-			<summary>{{ $t('plugins.WorkshopMotors.common.how_it_works') }}</summary>
-		<div class="text-body-2 grey--text mb-3">{{ $t('plugins.WorkshopMotors.advisor.intro') }}</div>
-		</details>
+		<help-guide :title="$t('plugins.WorkshopMotors.common.how_it_works')" :what="$t('plugins.WorkshopMotors.advisor.intro')" class="mb-3" />
 
 		<!-- Advice -->
 		<div class="tips">
@@ -60,12 +57,7 @@
 			</table>
 		</div>
 		<div v-if="loading" class="text-caption grey--text mt-1">{{ $t('plugins.WorkshopMotors.advisor.reading_sys_mode_g') }}</div>
-		<details class="wf-more">
-			<summary>{{ $t('plugins.WorkshopMotors.common.how_it_works') }}</summary>
-		<div class="text-caption grey--text mt-1">
-			{{ $t('plugins.WorkshopMotors.advisor.table_note') }}
-		</div>
-		</details>
+		<help-guide :title="$t('plugins.WorkshopMotors.common.how_it_works')" :how="$t('plugins.WorkshopMotors.advisor.table_note')" class="mt-1" />
 
 		<!-- Motor data -->
 		<div class="text-subtitle-2 mt-4 mb-1">{{ $t('plugins.WorkshopMotors.advisor.your_motors_data') }}<help-tip :title="$t('plugins.WorkshopMotors.advisor.your_motors_data')">
@@ -111,6 +103,7 @@ import i18n from '../../i18n'
 import { settings } from './settings.js' // shared settings files with revision (vue/_shared)
 import { MODE_FILES, limitsOfFile, activeLimits, limitRow, bestTests, fileForLines, advice, copyText, formFromMotorFile, motorFileFromForm } from './advisor.js'
 import HelpTip from './HelpTip.vue' // vue/_shared36
+import HelpGuide from './HelpGuide.vue' // vue/_shared36
 
 const MOTOR_FILE = '0:/sys/workshop/config/motors.json';
 // readable driver id: DWC's store gives {board, driver} objects
@@ -126,7 +119,7 @@ async function readFile(path) {
 }
 
 export default {
-	components: { HelpTip },
+	components: { HelpTip, HelpGuide },
 	props: {
 		report: { type: Object, default: null },
 		axes: { type: Array, default: () => [] },

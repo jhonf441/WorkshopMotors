@@ -72,12 +72,7 @@
 					</v-btn-toggle>
 				</v-col>
 			</v-row>
-			<details class="wf-more">
-				<summary>{{ $t('plugins.WorkshopMotors.common.how_it_works') }}</summary>
-			<div class="text-caption grey--text mt-1">
-				{{ $t('plugins.WorkshopMotors.crashFinal.settings_note', { min: vMin == null ? '--' : vMin.toFixed(1), h, approach: approach, over: overshoot }) }}
-			</div>
-			</details>
+			<help-guide :title="$t('plugins.WorkshopMotors.common.how_it_works')" :how="$t('plugins.WorkshopMotors.crashFinal.settings_note', { min: vMin == null ? '--' : vMin.toFixed(1), h, approach: approach, over: overshoot })" class="mt-1" />
 
 			<div class="ec-chips d-flex flex-wrap mt-2" style="gap:6px">
 				<v-chip v-for="r in reqs" :key="r.key" small :color="r.ok ? 'success' : (r.blocks ? 'error' : 'warning')" outlined>
@@ -114,7 +109,7 @@
 				</span>
 				<span v-else-if="reasonNoBegin" class="text-caption grey--text">{{ reasonNoBegin }}</span>
 			</div>
-			<v-alert v-if="error" dense outlined type="error" class="mt-3 mb-0">{{ error }}</v-alert>
+			<outcome-note :text="error || ''" :kind="errorKind" class="mt-3" />
 
 			<div v-if="steps.length" class="mt-3">
 				<div v-for="(p, i) in steps" :key="i" class="text-body-2">
@@ -202,7 +197,9 @@ import i18n from '../../i18n'
 import { mapActions } from 'vuex'
 import { api, reserveMotion } from './workshop-api.js'
 import { workshopProfile } from './machine-profile.js' // what the service discovered about the boards (vue/_shared)
-import { withReservation, refusedText } from './sequence.js'
+import { withReservation, refusedText, refusedOf } from './sequence.js'
+import OutcomeNote from './OutcomeNote.vue'
+import HelpGuide from './HelpGuide.vue' // vue/_shared36
 import {
 	axesOf as axes, valuesInitial, requirements, speedMin, newSweep, resultFree, resultCap, hint, macroStep, MACRO_STEP,
 	readStep, commandsRestore, proposeConfig, diffLines, hintHoming, requestSaved, newTx, readJson, readM569, readM915, letterGcode
@@ -248,6 +245,7 @@ function saveLocal(v) {
 }
 
 export default {
+	components: { OutcomeNote, HelpGuide },
 	props: {
 		om: { type: Object, default: null },
 		report: { type: Object, default: null },
@@ -265,6 +263,7 @@ export default {
 			stop: false,
 			state: '',
 			error: null,
+			refused: null, // the refusal behind `error`, with its cause (sequence.js refusedOf)
 			sweep: null,
 			steps: [],
 			lastStop: null,
@@ -282,6 +281,10 @@ export default {
 		};
 	},
 	computed: {
+		// the cause of the refusal that is the error now ('' = not a refusal of the session or the role)
+		errorKind() {
+			return this.refused && this.refused.text === this.error ? this.refused.kind : '';
+		},
 		hasConfig() {
 			return pluginActive(this.$store, 'config');
 		},
@@ -505,6 +508,7 @@ export default {
 				// the jog and the other pages wait while it runs (WorkshopService motion owner)
 				await withReservation(reserveMotion, i18n.t('plugins.WorkshopMotors.sequence.endstop', { axis: this.axis.letter }), fn);
 			} catch (e) {
+				this.refused = refusedOf(e);
 				this.error = refusedText(e) || i18n.t('plugins.WorkshopMotors.common.the_test_was_interrupted') + (e.message || e);
 			} finally {
 				await this.restoreM915();

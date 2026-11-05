@@ -6,12 +6,12 @@
 				<div class="font-weight-medium">{{ t('banner_title', { list }) }}</div>
 				<div class="text-body-2">{{ t('banner_text') }}</div>
 				<div v-if="lock.blocked" class="text-caption mt-1">{{ lock.reason }}</div>
-				<div v-if="lockTitle" class="text-caption mt-1">{{ lockTitle }}</div>
+				<lock-reason :op="enableOp" need="operator" class="mt-1" />
 				<div v-if="result" class="text-body-2 mt-1">{{ result }}</div>
 			</div>
 			<v-btn
 				small :color="armedNow ? 'amber darken-3' : 'white'" :outlined="!armedNow" :dark="armedNow" :light="!armedNow"
-				:disabled="!usable" :title="lockTitle" :loading="busy" @click="touchEnable()"
+				:disabled="!usable" :loading="busy" @click="touchEnable()"
 			>
 				<v-icon small left>{{ armedNow ? 'mdi-alert' : 'mdi-engine' }}</v-icon>{{ armedNow ? t('banner_tap_again', { list }) : t('banner_enable_all') }}
 			</v-btn>
@@ -34,9 +34,12 @@ import { ts } from './shared-t.js'
 import { serviceText, serviceDefaultKey } from './service-text.js'
 import { block, tap, canUse, request } from './enable.js'
 import { sendMotors } from './motors-send.js'
+import LockReason from './LockReason.vue' // vue/_shared36
 
 export default {
+	components: { LockReason },
 	mixins: [roleMixin],
+	sessionData: ['armed', 'result'],
 	props: {
 		keys: { type: Array, required: true },
 		report: { type: Object, default: null },
@@ -57,12 +60,12 @@ export default {
 		lock() {
 			return block(this.om, this.liveJob, { report: this.report, reserved: this.reserved });
 		},
-		// why the button does not move because of the person (no session / role): '' when they may enable
-		lockTitle() {
-			return this.lockTextOp(request('enable').op, 'operator');
+		// the operation of the service that enabling calls (the reason next to the button is <lock-reason> of it)
+		enableOp() {
+			return request('enable').op;
 		},
 		usable() {
-			return !this.lockTitle && canUse('enable', this.lock, true, this.busy);
+			return this.canDo(this.enableOp) && canUse('enable', this.lock, true, this.busy);
 		},
 		armedNow() {
 			return !!this.armed && this.now < this.armed.until;

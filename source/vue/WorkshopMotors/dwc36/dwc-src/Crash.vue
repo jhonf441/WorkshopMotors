@@ -84,7 +84,7 @@ while it runs + how to cut it. -->
 		</div>
 		<div v-if="!understood" class="text-caption grey--text mt-1">{{ $t('plugins.WorkshopMotors.common.tick_understood_in_the_box_to') }}</div>
 
-		<v-alert v-if="error" dense outlined type="error" class="mt-3 mb-0">{{ error }}</v-alert>
+		<outcome-note :text="error || ''" :kind="errorKind" class="mt-3" />
 		<div v-if="Object.keys(results).length" class="mt-3">
 			<div v-for="(r, e) in results" :key="e" class="text-body-2">
 				<b>{{ e }}:</b>
@@ -114,7 +114,8 @@ import { settings } from './settings.js' // shared settings files with revision 
 import { machineFree } from './machine-free.js' // file job, paused or live (vue/_shared)
 import { ts } from './shared-t.js'
 import { serviceText, serviceDefaultKey } from './service-text.js'
-import { ORIGIN, withReservation, refusedText } from './sequence.js'
+import { ORIGIN, withReservation, refusedText, refusedOf } from './sequence.js'
+import OutcomeNote from './OutcomeNote.vue'
 import HelpTip from './HelpTip.vue' // vue/_shared36
 
 // Calibrating the crash is a sequence that changes the motors' sensitivity: moving is
@@ -143,7 +144,7 @@ async function readJson(path, def) {
 }
 
 export default {
-	components: { HelpTip },
+	components: { HelpTip, OutcomeNote },
 	props: {
 		axes: { type: Array, default: () => [] },
 		state: { type: String, default: '' }
@@ -160,6 +161,7 @@ export default {
 			axisCurrent: '',
 			results: {},
 			error: null,
+			refused: null, // the refusal behind `error`, with its cause (sequence.js refusedOf)
 			saving: false,
 			savedMsg: null,
 			understood: false,
@@ -167,6 +169,10 @@ export default {
 		};
 	},
 	computed: {
+		// the cause of the refusal that is the error now ('' = not a refusal of the session or the role)
+		errorKind() {
+			return this.refused && this.refused.text === this.error ? this.refused.kind : '';
+		},
 		feedMax() {
 			const f = this.file && this.file.feedMax;
 			return typeof f === 'number' && f > 0 ? f : 6000;
@@ -313,6 +319,7 @@ export default {
 					}
 				});
 			} catch (e) {
+				this.refused = refusedOf(e);
 				this.error = refusedText(e) || i18n.t('plugins.WorkshopMotors.crash.calibration_interrupted_error', { error: e.message || String(e) });
 			} finally {
 				this.running = false;
