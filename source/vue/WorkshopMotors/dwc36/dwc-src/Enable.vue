@@ -106,7 +106,7 @@
 
 		<div v-if="!understood && !lock.blocked" class="wf-note is-info mt-2" role="note"><v-icon :size="16" class="wf-note-icon" aria-hidden="true">mdi-information-outline</v-icon><span>{{ e('to_release_first_tick_understood') }}</span></div>
 		<div v-if="busy" class="text-caption mt-2">{{ e('sending') }}</div>
-		<outcome-note v-if="result" :text="result.text" :kind="result.kind || ''" :type="result.ok ? 'success' : 'error'" class="mt-2" />
+		<outcome-note v-if="result" :text="result.text" :type="result.ok ? 'success' : 'error'" class="mt-2" />
 
 		<div class="mt-2 d-flex align-center text-body-2" style="gap:4px">
 			<span>{{ e('what_can_and_cannot_be_done') }}</span>
@@ -285,7 +285,7 @@ export default {
 			const r = await sendMotors(apiTextKeepRefusals, action, keys);
 			this.busy = false;
 			if (!r.ok) {
-				this.result = { ok: false, text: r.error, kind: r.kind || '' };
+				this.result = { ok: false, text: r.failure || r.error };
 				return;
 			}
 			const list = keys || this.motors.map(m => m.key);

@@ -2,7 +2,7 @@
   "id": "WorkshopMotors",
   "name": "Motors",
   "author": "jhonf441",
-  "version": "2.6.19",
+  "version": "2.6.20",
   "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/jhonf441/WorkshopMotors",
   "tags": [
@@ -28,9 +28,9 @@
     "sys/workshop/macros/step-ceiling.g"
   ],
   "dwcFiles": [
-    "css/WorkshopMotors.79c899bb.css",
-    "css/WorkshopMotors.79c899bb.css.gz",
-    "js/WorkshopMotors.f1772f15.js",
-    "js/WorkshopMotors.f1772f15.js.gz"
+    "css/WorkshopMotors.f1384a9f.css",
+    "css/WorkshopMotors.f1384a9f.css.gz",
+    "js/WorkshopMotors.f7a76e14.js",
+    "js/WorkshopMotors.f7a76e14.js.gz"
   ]
 }

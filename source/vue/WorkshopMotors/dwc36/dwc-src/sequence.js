@@ -9,9 +9,9 @@ import i18n from '../../i18n'
 
 import { machineFree, ownerMotion } from './machine-free.js'
 import { ts } from './shared-t.js'
+import { failureOf } from './session-refusal.js'
 import { serviceText, serviceDefaultKey } from './service-text.js'
-import { deviceId, workshopRole } from './workshop-auth.js'
-import { noticeText } from './notice-kind.js'
+import { deviceId } from './workshop-auth.js'
 
 export const ORIGIN = 'WorkshopMotors';
 export const RESERVE_S = 120; // a reservation lasts this long unless renewed
@@ -78,23 +78,18 @@ export async function withReservation(reserveMotion, text, fn, timers) {
 	}
 }
 
-// A sequence refused before it started says so (not "interrupted": nothing moved). '' for any other error.
-// The cause is told apart: motion_denied (somebody else holds the movement), no session (401: signing in fixes it) or a role too
-// low (403: the standard sentence names the role that is needed and the current one).
-export function refusedText(e) {
-	const code = e && e.code;
-	if (code === 'motion_denied') return i18n.t('plugins.WorkshopMotors.common.not_started', { reason: e.message || '' });
-	if (code === 'login_required') return ts('notice_session_reason');
-	// the commissioning sequences are a technician's: the sentence names that role and the one the person has
-	if (code === 'forbidden') return noticeText('role', { needed: 'technician', role: workshopRole() }, ts);
-	return '';
+// A sequence that did not run to the end, kept by the page as the ERROR it got (session-refusal.js failureOf) and told in a computed way
+// (<outcome-note :text="failure">): a refusal of the session or the role is the standard sentence of its cause (no session: sign in; a role too low: the
+// sentence names the action, the role needed and the current one), never the red "interrupted"; motion_denied (somebody else holds the movement) says
+// "not started" with the reason (nothing moved); any other error is the page's own text, label(message). The sequences are a technician's.
+export function stoppedFailure(e, label, action) {
+	const text = m => (e && e.code === 'motion_denied' ? i18n.t('plugins.WorkshopMotors.common.not_started', { reason: m }) : label(m));
+	return failureOf(e, text, action);
 }
 
-// The same refusal with its CAUSE, for <outcome-note>: { kind: 'session' | 'role' | '' ('' = somebody else holds the movement), text } or null
-// when the error is not a refusal. A refusal of the session or the role is a calm note of its cause, never the red error of the test.
-export function refusedOf(e) {
-	const text = refusedText(e);
-	if (!text) return null;
-	const code = e && e.code;
-	return { kind: code === 'login_required' ? 'session' : code === 'forbidden' ? 'role' : '', text };
+// A note added after what the page already says: a text gets it appended; a stored failure keeps its error (so the refusal still follows the role and
+// the language) and says the note after its own line.
+export function withNote(current, note) {
+	if (current && typeof current === 'object') return Object.assign({}, current, { label: m => (typeof current.label === 'function' ? current.label(m) : String(current.label || '') + m) + ' ' + note });
+	return (current ? current + ' ' : '') + note;
 }

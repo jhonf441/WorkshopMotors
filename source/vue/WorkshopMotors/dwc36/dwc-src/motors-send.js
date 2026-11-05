@@ -6,7 +6,7 @@ import i18n from '../../i18n'
 // vue/_shared/workshop-api.js; a fake in test/enable.test.js).
 
 import { request, readResponse } from './enable.js'
-import { refusedOf } from './sequence.js'
+import { failureOf, isRefusal } from './session-refusal.js'
 
 export const ANSWER_MS = 15000; // "Actions that take time" (DESIGN.md 5): without an answer in 15 s, say so
 
@@ -24,10 +24,9 @@ export async function sendMotors(apiText, action, keys) {
 		}
 		return readResponse(answer);
 	} catch (e) {
-		// a refusal says its cause (no session / role), not "could not send: Error: ..."
-		const refused = refusedOf(e);
-		if (refused) return { ok: false, error: refused.text, kind: refused.kind, command: '' };
-		return { ok: false, error: i18n.t('plugins.WorkshopMotors.enable.could_not_send') + ((e && e.message) || e), command: '' };
+		// a refusal says its cause (no session / role) and names the action, never "could not send: Error: ...": the page keeps the error and tells it by a computed
+		const failure = failureOf(e, m => i18n.t('plugins.WorkshopMotors.enable.could_not_send') + m, () => i18n.t('plugins.WorkshopMotors.enable.act_' + action));
+		return { ok: false, error: isRefusal(e) ? '' : i18n.t('plugins.WorkshopMotors.enable.could_not_send') + ((e && e.message) || e), failure, command: '' };
 	} finally {
 		clearTimeout(timer);
 	}

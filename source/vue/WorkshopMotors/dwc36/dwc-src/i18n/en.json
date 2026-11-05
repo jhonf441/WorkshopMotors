@@ -1,5 +1,8 @@
 {
 	"common": {
+		"act_test": "Running the test",
+		"act_calibrate": "Calibrating",
+		"act_measure": "Measuring",
 		"how_it_works": "How it works",
 		"could_not_save": "Could not save: ",
 		"3d_printing": "3D printing",
@@ -465,6 +468,8 @@
 		"alert_ongoing": "ongoing"
 	},
 	"enable": {
+		"act_disable": "Releasing the motors",
+		"act_enable": "Enabling the motors",
 		"the_workshopservice_service_does_not_have": "The WorkshopService service does not have this function: update it.",
 		"to_stop_it_enable_again_and": "To stop it: Enable again and home. In case of danger, use the Emergency stop.",
 		"while_released_do_not_use_the": "While released, do not use the jog or other movement buttons: any movement enables them again by itself.",

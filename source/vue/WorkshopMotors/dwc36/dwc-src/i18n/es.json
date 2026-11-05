@@ -1,5 +1,8 @@
 {
 	"common": {
+		"act_test": "Hacer la prueba",
+		"act_calibrate": "Calibrar",
+		"act_measure": "Medir",
 		"how_it_works": "Cómo funciona",
 		"could_not_save": "No se pudo guardar: ",
 		"3d_printing": "Impresión 3D",
@@ -465,6 +468,8 @@
 		"alert_ongoing": "sigue"
 	},
 	"enable": {
+		"act_disable": "Soltar los motores",
+		"act_enable": "Activar los motores",
 		"the_workshopservice_service_does_not_have": "El servicio WorkshopService no tiene esta función: actualízalo.",
 		"to_stop_it_enable_again_and": "Para cortarlo: Habilitar de nuevo y hacer homing. Ante un peligro, usa la Parada de emergencia.",
 		"while_released_do_not_use_the": "Mientras estén sueltos no uses el jog ni otros botones de movimiento: cualquier movimiento los vuelve a habilitar solo.",

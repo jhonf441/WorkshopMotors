@@ -109,7 +109,7 @@
 				</span>
 				<span v-else-if="reasonNoBegin" class="text-caption grey--text">{{ reasonNoBegin }}</span>
 			</div>
-			<outcome-note :text="error || ''" :kind="errorKind" class="mt-3" />
+			<outcome-note :text="error || ''" class="mt-3" />
 
 			<div v-if="steps.length" class="mt-3">
 				<div v-for="(p, i) in steps" :key="i" class="text-body-2">
@@ -197,7 +197,7 @@ import i18n from '../../i18n'
 import { mapActions } from 'vuex'
 import { api, reserveMotion } from './workshop-api.js'
 import { workshopProfile } from './machine-profile.js' // what the service discovered about the boards (vue/_shared)
-import { withReservation, refusedText, refusedOf } from './sequence.js'
+import { withReservation, stoppedFailure, withNote } from './sequence.js'
 import OutcomeNote from './OutcomeNote.vue'
 import HelpGuide from './HelpGuide.vue' // vue/_shared36
 import {
@@ -263,7 +263,6 @@ export default {
 			stop: false,
 			state: '',
 			error: null,
-			refused: null, // the refusal behind `error`, with its cause (sequence.js refusedOf)
 			sweep: null,
 			steps: [],
 			lastStop: null,
@@ -281,10 +280,6 @@ export default {
 		};
 	},
 	computed: {
-		// the cause of the refusal that is the error now ('' = not a refusal of the session or the role)
-		errorKind() {
-			return this.refused && this.refused.text === this.error ? this.refused.kind : '';
-		},
 		hasConfig() {
 			return pluginActive(this.$store, 'config');
 		},
@@ -508,8 +503,7 @@ export default {
 				// the jog and the other pages wait while it runs (WorkshopService motion owner)
 				await withReservation(reserveMotion, i18n.t('plugins.WorkshopMotors.sequence.endstop', { axis: this.axis.letter }), fn);
 			} catch (e) {
-				this.refused = refusedOf(e);
-				this.error = refusedText(e) || i18n.t('plugins.WorkshopMotors.common.the_test_was_interrupted') + (e.message || e);
+				this.error = stoppedFailure(e, m => i18n.t('plugins.WorkshopMotors.common.the_test_was_interrupted') + m, () => i18n.t('plugins.WorkshopMotors.common.act_test'));
 			} finally {
 				await this.restoreM915();
 				if (!originals.length) {
@@ -532,7 +526,7 @@ export default {
 				this.origLocal = null;
 				saveLocal(null);
 			} catch (e) {
-				this.error = (this.error ? this.error + ' ' : '') + i18n.t('plugins.WorkshopMotors.crashFinal.could_not_return_to_the_previous');
+				this.error = withNote(this.error, i18n.t('plugins.WorkshopMotors.crashFinal.could_not_return_to_the_previous'));
 			}
 		},
 		async begin() {
