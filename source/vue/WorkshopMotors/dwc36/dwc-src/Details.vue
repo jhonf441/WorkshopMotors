@@ -113,14 +113,14 @@
 			</div>
 
 			<!-- how it is measured -->
-			<v-expansion-panels flat class="mt-2">
-				<v-expansion-panel>
-					<v-expansion-panel-header class="px-0"><span><v-icon small class="mr-1">mdi-help-circle-outline</v-icon>{{ t('motors.how_this_data_is_measured') }}</span></v-expansion-panel-header>
-					<v-expansion-panel-content class="text-body-2 det-help">
+			<div class="mt-2 d-flex align-center text-body-2" style="gap:4px">
+				<span>{{ t('motors.how_this_data_is_measured') }}</span>
+				<help-tip :title="t('motors.how_this_data_is_measured')">
+					<div class="text-body-2 det-help">
 						<p v-for="k in HELP" :key="k"><b>{{ t('details.help_' + k + '_title') }}</b> {{ t('details.help_' + k) }}</p>
-					</v-expansion-panel-content>
-				</v-expansion-panel>
-			</v-expansion-panels>
+					</div>
+				</help-tip>
+			</div>
 		</template>
 	</div>
 </template>
@@ -134,12 +134,14 @@
 
 import { faultsOfDriver, faultLabel, faultHint, worstSeverity } from './faults.js'
 import { num, smart, khz, mmMinToS } from './format.js'
+import HelpTip from './HelpTip.vue' // vue/_shared36
 import {
 	speedSourceText, formatText, currentText, hiccupsTile, speedLimited, refKhz, boardRateHz, ceilingText, kinematicsText,
 	kinematicsNote, driverRows
 } from './report-view.js'
 
 export default {
+	components: { HelpTip },
 	props: {
 		report: { type: Object, default: null },
 		ceiling: { type: Object, default: null }

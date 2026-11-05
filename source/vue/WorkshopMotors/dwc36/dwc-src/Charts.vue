@@ -1,14 +1,10 @@
 <template>
 	<div>
 		<!-- ===== Charts a eleccion ===== -->
-		<div class="text-subtitle-2 mb-1"><v-icon small class="mr-1">mdi-chart-multiple</v-icon>{{ $t('plugins.WorkshopMotors.common.charts') }}</div>
-		<details class="wf-more">
-			<summary>{{ $t('plugins.WorkshopMotors.common.how_it_works') }}</summary>
-		<div class="text-caption grey--text mb-2">
+		<div class="text-subtitle-2 mb-1"><v-icon small class="mr-1">mdi-chart-multiple</v-icon>{{ $t('plugins.WorkshopMotors.common.charts') }}<help-tip :title="$t('plugins.WorkshopMotors.common.charts')">
 			{{ $t('plugins.WorkshopMotors.charts.pick_one_or_several_they_use') }}
 			<br>{{ $t('plugins.WorkshopMotors.charts.pulses_help') }}
-		</div>
-		</details>
+		</help-tip></div>
 		<v-autocomplete
 			v-model="sel" :items="itemsSelector" item-text="name" item-value="id" multiple chips small-chips deletable-chips
 			dense outlined hide-details clearable :label="$t('plugins.WorkshopMotors.charts.charts_to_show')" :no-data-text="$t('plugins.WorkshopMotors.charts.waiting_for_data_from_the_service')"
@@ -93,13 +89,9 @@
 
 		<!-- ===== Reporte avanzado ===== -->
 		<v-divider class="my-4" />
-		<div class="text-subtitle-2 mb-1"><v-icon small class="mr-1">mdi-file-chart-outline</v-icon>{{ $t('plugins.WorkshopMotors.charts.advanced_report_of_all_motors') }}</div>
-		<details class="wf-more">
-			<summary>{{ $t('plugins.WorkshopMotors.common.how_it_works') }}</summary>
-		<div class="text-caption grey--text mb-2">
+		<div class="text-subtitle-2 mb-1"><v-icon small class="mr-1">mdi-file-chart-outline</v-icon>{{ $t('plugins.WorkshopMotors.charts.advanced_report_of_all_motors') }}<help-tip :title="$t('plugins.WorkshopMotors.charts.advanced_report_of_all_motors')">
 			{{ $t('plugins.WorkshopMotors.charts.report_intro', { period: spanMin < 60 ? spanMin + ' min' : '1 h' }) }}
-		</div>
-		</details>
+		</help-tip></div>
 		<div class="d-flex flex-wrap align-center" style="gap:8px">
 			<v-btn small color="primary" :loading="reading" :disabled="reading" @click="generate()">
 				<v-icon left small>mdi-file-search-outline</v-icon>{{ $t('plugins.WorkshopMotors.charts.generate_report') }}
@@ -181,6 +173,7 @@ import { ts } from './shared-t.js'
 import { historyOf, R } from './record.js'
 import { faultLabel } from './faults.js'
 import { seriesColor, REFERENCE_COLOR } from './chart-data.js'
+import HelpTip from './HelpTip.vue' // vue/_shared36
 
 const SEL_KEY = 'workshopMotorsChartSel';
 const SPAN_KEY = 'workshopMotorsChartSpan';
@@ -211,7 +204,7 @@ function withTime(p, ms) {
 }
 
 export default {
-	components: { DetailChart },
+	components: { HelpTip, DetailChart },
 	props: {
 		report: { type: Object, default: null },
 		om: { type: Object, default: null },

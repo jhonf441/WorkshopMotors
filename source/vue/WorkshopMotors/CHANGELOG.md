@@ -1,5 +1,9 @@
 # WorkshopMotors -- historial de versiones
 
+## 2.6.18 -- 2026-11-04
+
+- Help of fields and cards is the shared help-tip; sign out no longer reopens the PIN dialog
+
 ## 2.6.17 -- 2026-11-04
 
 - Rebuilt with the readable text colours, the shared start-up card and the session notice

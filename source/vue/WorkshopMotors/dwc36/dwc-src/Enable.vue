@@ -107,21 +107,18 @@
 		<div v-if="busy" class="text-caption mt-2">{{ e('sending') }}</div>
 		<v-alert v-if="result" dense outlined :type="result.ok ? 'success' : 'error'" class="mt-2 mb-0">{{ result.text }}</v-alert>
 
-		<v-expansion-panels flat class="mt-2">
-			<v-expansion-panel>
-				<v-expansion-panel-header class="px-0"><span><v-icon small class="mr-1">mdi-help-circle-outline</v-icon>{{ e('what_can_and_cannot_be_done') }}</span></v-expansion-panel-header>
-				<v-expansion-panel-content class="text-body-2">
+		<div class="mt-2 d-flex align-center text-body-2" style="gap:4px">
+			<span>{{ e('what_can_and_cannot_be_done') }}</span>
+			<help-tip :title="e('what_can_and_cannot_be_done')">
+				<div class="text-body-2">
 					<p><b>{{ e('per_axis_or_extruder_not_per') }}</b> {{ e('the_firmware_reprapfirmware_enables_and') }}</p>
 					<p><b>{{ e('commands') }}</b> {{ e('m18_x_one_axis_m18_e0') }}</p>
 					<p><b>{{ e('they_enable_themselves') }}</b> {{ e('any_move_of_that_axis_jog') }}</p>
 					<p><b>{{ e('idle') }}</b> {{ e('motors_at_rest_are_not_disabled') }}</p>
-					<details class="wf-more">
-						<summary>{{ $t('plugins.WorkshopMotors.common.how_it_works') }}</summary>
 					<p><b>{{ e('how_the_state_is_known') }}</b> {{ e('the_firmware_does_not_publish_it') }}</p>
-					</details>
-				</v-expansion-panel-content>
-			</v-expansion-panel>
-		</v-expansion-panels>
+				</div>
+			</help-tip>
+		</div>
 	</div>
 </template>
 
@@ -142,8 +139,10 @@ import { ENABLE_COLOR, ENABLE_ICON } from './motor-state.js'
 import { sendMotors, ANSWER_MS } from './motors-send.js'
 import { roleMixin } from './role-mixin.js' // what the role may do (vue/_shared)
 import { signedOut } from './workshop-auth.js'
+import HelpTip from './HelpTip.vue' // vue/_shared36
 
 export default {
+	components: { HelpTip },
 	mixins: [roleMixin],
 	props: {
 		report: { type: Object, default: null },

@@ -68,13 +68,9 @@
 		</details>
 
 		<!-- Motor data -->
-		<div class="text-subtitle-2 mt-4 mb-1">{{ $t('plugins.WorkshopMotors.advisor.your_motors_data') }}</div>
-		<details class="wf-more">
-			<summary>{{ $t('plugins.WorkshopMotors.common.how_it_works') }}</summary>
-		<div class="text-caption grey--text mb-2">
+		<div class="text-subtitle-2 mt-4 mb-1">{{ $t('plugins.WorkshopMotors.advisor.your_motors_data') }}<help-tip :title="$t('plugins.WorkshopMotors.advisor.your_motors_data')">
 			{{ $t('plugins.WorkshopMotors.advisor.motor_data_note', { v: vin.toFixed(0) }) }}
-		</div>
-		</details>
+		</help-tip></div>
 		<div style="overflow-x:auto">
 			<table class="table-motor">
 				<thead>
@@ -114,6 +110,7 @@ import i18n from '../../i18n'
 
 import { settings } from './settings.js' // shared settings files with revision (vue/_shared)
 import { MODE_FILES, limitsOfFile, activeLimits, limitRow, bestTests, fileForLines, advice, copyText, formFromMotorFile, motorFileFromForm } from './advisor.js'
+import HelpTip from './HelpTip.vue' // vue/_shared36
 
 const MOTOR_FILE = '0:/sys/workshop/config/motors.json';
 // readable driver id: DWC's store gives {board, driver} objects
@@ -129,6 +126,7 @@ async function readFile(path) {
 }
 
 export default {
+	components: { HelpTip },
 	props: {
 		report: { type: Object, default: null },
 		axes: { type: Array, default: () => [] },

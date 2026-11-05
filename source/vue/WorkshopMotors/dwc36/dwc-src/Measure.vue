@@ -1,14 +1,10 @@
 <template>
 	<div>
 		<!-- ===================== Step ceiling ===================== -->
-		<div class="text-subtitle-1 mb-1"><v-icon small class="mr-1">mdi-pulse</v-icon>{{ $t('plugins.WorkshopMotors.measure.your_board_s_pulse_ceiling') }}</div>
-		<details class="wf-more">
-			<summary>{{ $t('plugins.WorkshopMotors.common.how_it_works') }}</summary>
-		<div class="explica text-body-2">
+		<div class="text-subtitle-1 mb-1"><v-icon small class="mr-1">mdi-pulse</v-icon>{{ $t('plugins.WorkshopMotors.measure.your_board_s_pulse_ceiling') }}<help-tip :title="$t('plugins.WorkshopMotors.measure.your_board_s_pulse_ceiling')">
 			<v-icon small color="info" class="mr-1">mdi-information</v-icon>
 			{{ $t('plugins.WorkshopMotors.measure.ceiling_intro', { micro: MICRO }) }} <b>hiccups</b> {{ $t('plugins.WorkshopMotors.measure.pulses_it_didn_t_generate_in') }}
-		</div>
-		</details>
+		</help-tip></div>
 		<div class="d-flex flex-wrap mt-3" style="gap:6px">
 			<v-chip v-for="r in reqCeiling" :key="r.text" small :color="r.ok ? 'success' : 'error'" outlined>
 				<v-icon x-small left>{{ r.ok ? 'mdi-check' : 'mdi-close' }}</v-icon>{{ r.text }}
@@ -132,6 +128,7 @@ import References from './References.vue'
 import { reserveMotion } from './workshop-api.js'
 import { settings } from './settings.js' // shared settings files with revision (vue/_shared): .bak and "another person changed this"
 import { sequenceBlock, withReservation, refusedText } from './sequence.js'
+import HelpTip from './HelpTip.vue' // vue/_shared36
 
 export const CEILING_FILE = '0:/sys/workshop/config/step-ceiling.json';
 const CORRECTION_FILE = '0:/sys/workshop/config/current.json';
@@ -174,7 +171,7 @@ function saveIdleLeft(v) {
 }
 
 export default {
-	components: { References },
+	components: { HelpTip, References },
 	props: {
 		axes: { type: Array, default: () => [] },
 		state: { type: String, default: '' },

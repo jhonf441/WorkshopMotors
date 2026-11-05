@@ -3,13 +3,10 @@
 		<div class="text-subtitle-2 d-flex align-center flex-wrap" style="gap:6px">
 			<v-icon small>mdi-table-large</v-icon>{{ $t('plugins.WorkshopMotors.references.references_to_compare') }}
 			<v-chip x-small label outlined :color="shared ? 'success' : 'grey'">{{ shared ? $t('plugins.WorkshopMotors.references.shared_table_up_to_date') : $t('plugins.WorkshopMotors.references.copy_included_in_the_plugin') }}</v-chip>
+			<help-tip :title="$t('plugins.WorkshopMotors.references.references_to_compare')">
+				{{ $t('plugins.WorkshopMotors.references.table_note') }}{{ timing ? ' (M569 T' + timing + ')' : '' }}.
+			</help-tip>
 		</div>
-		<details class="wf-more">
-			<summary>{{ $t('plugins.WorkshopMotors.common.how_it_works') }}</summary>
-		<div class="text-caption grey--text mb-2">
-			{{ $t('plugins.WorkshopMotors.references.table_note') }}{{ timing ? ' (M569 T' + timing + ')' : '' }}.
-		</div>
-		</details>
 		<div class="ref-scroll">
 			<v-simple-table dense class="ref-table">
 				<thead>
@@ -66,12 +63,14 @@ import REF from './references.json'
 import { readTable, caseText, sourceText, shareRow, timingOf, readCache, writeCache, TABLE_URL } from './references.js'
 import { exportReferences } from './export-files.js'
 import { ts } from './shared-t.js'
+import HelpTip from './HelpTip.vue' // vue/_shared36
 
 const REPO = 'WorkshopMotors';
 const pt = (key, params) => i18n.t('plugins.WorkshopMotors.' + key, params);
 const rt = (key, params) => pt('references.' + key, params);
 
 export default {
+	components: { HelpTip },
 	props: {
 		ceiling: { type: Object, default: null },
 		report: { type: Object, default: null }

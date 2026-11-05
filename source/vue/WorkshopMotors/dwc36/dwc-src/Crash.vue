@@ -37,13 +37,9 @@
 		</template>
 
 		<!-- Calibrar -->
-		<div class="text-subtitle-2 mt-4 mb-1">{{ $t('plugins.WorkshopMotors.crash.calibrate_the_sensitivity') }}</div>
-		<details class="wf-more">
-			<summary>{{ $t('plugins.WorkshopMotors.common.how_it_works') }}</summary>
-		<div class="text-body-2">
+		<div class="text-subtitle-2 mt-4 mb-1">{{ $t('plugins.WorkshopMotors.crash.calibrate_the_sensitivity') }}<help-tip :title="$t('plugins.WorkshopMotors.crash.calibrate_the_sensitivity')">
 			{{ $t('plugins.WorkshopMotors.crash.the_axis_goes_back_and_forth') }} <b>{{ $t('plugins.WorkshopMotors.crash.free_space') }}</b> {{ $t('plugins.WorkshopMotors.crash.about_12_cm_around_where_it') }}
-		</div>
-		</details>
+		</help-tip></div>
 		<!-- 2026-10-10 ("add enough warnings when crash is going to be
 configured"): level 4 = leaves the machine without a protection
 while it lasts -> fixed warnings + Understood checkbox + notice
@@ -119,6 +115,7 @@ import { machineFree } from './machine-free.js' // file job, paused or live (vue
 import { ts } from './shared-t.js'
 import { serviceText, serviceDefaultKey } from './service-text.js'
 import { ORIGIN, withReservation, refusedText } from './sequence.js'
+import HelpTip from './HelpTip.vue' // vue/_shared36
 
 // Calibrating the crash is a sequence that changes the motors' sensitivity: moving is
 // free with a paused job or a still live job, but this is NOT (2026-10-12): it is blocked.
@@ -146,6 +143,7 @@ async function readJson(path, def) {
 }
 
 export default {
+	components: { HelpTip },
 	props: {
 		axes: { type: Array, default: () => [] },
 		state: { type: String, default: '' }
