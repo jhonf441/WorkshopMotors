@@ -9,7 +9,7 @@
 
 		<v-alert v-if="pending" dense type="warning" class="mt-3 mb-0">
 			{{ $t('plugins.WorkshopMotors.crashFinal.previous_test_interrupted', { text: pending.text }) }}
-			<v-btn x-small color="warning" class="ml-2" :loading="restoring" @click="restorePending()">{{ $t('plugins.WorkshopMotors.common.restore_now') }}</v-btn>
+			<v-btn x-small color="warning" class="ml-2 black--text" :loading="restoring" @click="restorePending()">{{ $t('plugins.WorkshopMotors.common.restore_now') }}</v-btn>
 		</v-alert>
 
 		<!-- Eje -->
@@ -105,7 +105,7 @@
 					:label="$t('plugins.WorkshopMotors.crashFinal.understood_checkbox')" />
 			</div>
 			<div class="d-flex flex-wrap align-center mt-2" style="gap:8px">
-				<v-btn small color="error" :disabled="!canBegin" @click="begin()">
+				<v-btn small color="error darken-2" :disabled="!canBegin" @click="begin()">
 					<v-icon left small>mdi-play</v-icon>{{ sweep && sweep.phase !== 'free' ? $t('plugins.WorkshopMotors.crashFinal.start_over') : $t('plugins.WorkshopMotors.common.calibrate') }}
 				</v-btn>
 				<v-btn v-if="running" small outlined @click="stop = true">{{ $t('plugins.WorkshopMotors.crashFinal.stop_after_this_step') }}</v-btn>
@@ -140,7 +140,7 @@
 						{{ $t('plugins.WorkshopMotors.crashFinal.no_false_until_s', { s: sweep.lastOk }) }}{{ sweep.fake != null ? ' ' + $t('plugins.WorkshopMotors.crashFinal.false_with_s', { s: sweep.fake }) : '' }}.
 						{{ $t('plugins.WorkshopMotors.crashFinal.now_against_end_with') }} <b>S{{ sweep.candidate }}</b>{{ $t('plugins.WorkshopMotors.crashFinal.starts_at_mm_from_limit', { mm: approach }) }}
 					</div>
-					<v-btn small color="error" :disabled="!canMove" @click="testStop()"><v-icon left small>mdi-arrow-collapse-horizontal</v-icon>{{ $t('plugins.WorkshopMotors.crashFinal.test_against_end_with_s', { s: sweep.candidate }) }}</v-btn>
+					<v-btn small color="error darken-2" :disabled="!canMove" @click="testStop()"><v-icon left small>mdi-arrow-collapse-horizontal</v-icon>{{ $t('plugins.WorkshopMotors.crashFinal.test_against_end_with_s', { s: sweep.candidate }) }}</v-btn>
 				</template>
 			</div>
 			<v-alert v-if="sweep && sweep.phase === 'failure'" dense outlined type="warning" class="mt-3 mb-0">{{ sweep.reason }}</v-alert>

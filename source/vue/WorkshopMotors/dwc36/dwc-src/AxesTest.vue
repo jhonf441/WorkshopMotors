@@ -21,7 +21,7 @@
 		</div>
 		<v-alert v-if="pending" dense type="warning" class="mt-3 mb-0" outlined>
 			{{ $t('plugins.WorkshopMotors.axesTest.previous_test_interrupted', { axis: pending.axis }) }}
-			<v-btn x-small color="warning" class="ml-2" :loading="restoring" @click="restore()">{{ $t('plugins.WorkshopMotors.axesTest.restore_limits') }}</v-btn>
+			<v-btn x-small color="warning" class="ml-2 black--text" :loading="restoring" @click="restore()">{{ $t('plugins.WorkshopMotors.axesTest.restore_limits') }}</v-btn>
 		</v-alert>
 
 		<!-- Form -->

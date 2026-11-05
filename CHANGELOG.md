@@ -1,5 +1,13 @@
 # WorkshopMotors -- historial de versiones
 
+## 2.6.17 -- 2026-11-04
+
+- Rebuilt with the readable text colours, the shared start-up card and the session notice
+
+## 2.6.16 -- 2026-11-04
+
+- SideTabs: rebuilt with the side bar fix (the v-for template was missing)
+
 ## 2.6.15 -- 2026-11-04
 
 - Start-up card locked without a session; shared help tip; session chip class

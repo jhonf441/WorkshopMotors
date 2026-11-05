@@ -16,7 +16,7 @@
 		</div>
 		<v-alert v-if="globals.workshopCeilingPending" dense type="warning" class="mt-3 mb-0" outlined>
 			{{ $t('plugins.WorkshopMotors.measure.previous_measurement_interrupted', { axis: globals.workshopCeilingAxis }) }}
-			<v-btn x-small color="warning" class="ml-2" :loading="restoring" @click="restoreCeiling()">{{ $t('plugins.WorkshopMotors.measure.restore') }}</v-btn>
+			<v-btn x-small color="warning" class="ml-2 black--text" :loading="restoring" @click="restoreCeiling()">{{ $t('plugins.WorkshopMotors.measure.restore') }}</v-btn>
 		</v-alert>
 		<v-row dense class="mt-3">
 			<v-col cols="12" sm="3">
@@ -75,7 +75,7 @@
 		<!-- the page was closed or reloaded with the motors still at full current at rest -->
 		<v-alert v-if="idleLeft != null && !prepared" dense outlined type="warning" class="mt-3 mb-0">
 			{{ $t('plugins.WorkshopMotors.measure.idle_left_at_100', { pct: idleLeft }) }}
-			<v-btn x-small color="warning" class="ml-2" :loading="preparing" :disabled="busy" @click="finishCurrent()">{{ $t('plugins.WorkshopMotors.measure.restore') }}</v-btn>
+			<v-btn x-small color="warning" class="ml-2 black--text" :loading="preparing" :disabled="busy" @click="finishCurrent()">{{ $t('plugins.WorkshopMotors.measure.restore') }}</v-btn>
 		</v-alert>
 		<v-row dense class="mt-3">
 			<v-col cols="12" sm="4">

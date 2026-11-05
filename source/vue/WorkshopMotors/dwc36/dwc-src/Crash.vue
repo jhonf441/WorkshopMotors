@@ -50,7 +50,7 @@ while it lasts -> fixed warnings + Understood checkbox + notice
 while it runs + how to cut it. -->
 		<v-alert v-if="pending" dense type="warning" class="mt-3 mb-0">
 			{{ $t('plugins.WorkshopMotors.crash.interrupted_1', { axis: pending }) }} <b>{{ $t('plugins.WorkshopMotors.crash.reduced_current') }}</b> {{ $t('plugins.WorkshopMotors.crash.interrupted_2') }}
-			<v-btn x-small color="warning" class="ml-2" :loading="restoring" @click="restore()">{{ $t('plugins.WorkshopMotors.common.restore_now') }}</v-btn>
+			<v-btn x-small color="warning" class="ml-2 black--text" :loading="restoring" @click="restore()">{{ $t('plugins.WorkshopMotors.common.restore_now') }}</v-btn>
 		</v-alert>
 		<div class="notices mt-3" :class="{ on: running }">
 			<div class="notices-t">
@@ -78,7 +78,7 @@ while it runs + how to cut it. -->
 				<v-btn small value="XY">{{ $t('plugins.WorkshopMotors.crash.x_and_y') }}</v-btn>
 			</v-btn-toggle>
 			<!-- level 4 (DESIGN.md): the box and the checkbox already confirm; without a double tap -->
-			<v-btn small color="error" :disabled="!can || running || !understood || !!pending" @click="touchBegin()">
+			<v-btn small color="error darken-2" :disabled="!can || running || !understood || !!pending" @click="touchBegin()">
 				<v-icon left>mdi-play</v-icon>{{ $t('plugins.WorkshopMotors.common.calibrate') }}
 			</v-btn>
 			<span v-if="running" class="text-body-2">

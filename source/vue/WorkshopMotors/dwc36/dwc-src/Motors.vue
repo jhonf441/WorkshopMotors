@@ -14,6 +14,7 @@
 		</page-header>
 		<!-- level 4 (DESIGN.md 5): motors without holding force, visible in every section while it lasts -->
 		<released-band v-if="summary.released.length" :keys="summary.released" :report="report" :om="model" :live-job="liveJob" @open="goSection('release')" />
+		<hidden-note :sections="allSections" />
 		<div class="mb-3">
 			<div>
 				<div class="st-layout">
@@ -48,6 +49,7 @@ import StartupPanel from './StartupPanel.vue' // start-up card (vue/_shared)
 import PageHeader from './PageHeader.vue' // header of every page (vue/_shared)
 import { levelOfColor } from './page-health.js'
 import SideTabs from './SideTabs.vue'
+import HiddenNote from './HiddenNote.vue' // the quiet line for the sections this role does not see (vue/_shared36)
 import StateSection from './StateSection.vue'
 import DetailsSection from './Details.vue'
 import ChartsSection from './Charts.vue'
@@ -62,7 +64,7 @@ import { roleMixin } from './role-mixin.js' // what the role sees (vue/_shared)
 import { rowsMotors, MACROS_DIR } from './startup-rows.js'
 import { freshness, motorStates, pageSummary } from './motor-state.js'
 import { parseTestsCsv } from './report-view.js'
-import { restoreSection, sideItems, allowedSection } from './sections.js'
+import { restoreSection, sideItems, allowedSection, SECTIONS } from './sections.js'
 import { start as startRecord } from './record.js'
 import { pluginOf } from './workshop-ids.js'
 import { api } from './workshop-api.js'
@@ -83,7 +85,7 @@ function readSection() {
 
 export default {
 	mixins: [roleMixin],
-	components: { PageHeader, ControlHolderChip, ServiceNotice, StartupPanel, SideTabs, StateSection, DetailsSection, ChartsSection, AdvisorSection, EnableSection, AxesTest, MeasureSection, CrashSection, ReleasedBand },
+	components: { PageHeader, ControlHolderChip, ServiceNotice, StartupPanel, SideTabs, HiddenNote, StateSection, DetailsSection, ChartsSection, AdvisorSection, EnableSection, AxesTest, MeasureSection, CrashSection, ReleasedBand },
 	data() {
 		return {
 			section: readSection(),
@@ -137,6 +139,10 @@ export default {
 		},
 		summary() {
 			return pageSummary(this.motors, this.report, this.fresh);
+		},
+		// every section with its minimum role: the hidden-note says when some are not for this person
+		allSections() {
+			return SECTIONS;
 		},
 		sections() {
 			return sideItems(k => this.$t('plugins.WorkshopMotors.' + k), op => this.canDo(op));
@@ -224,6 +230,11 @@ export default {
 		clearTimeout(this._startupWait);
 	},
 	methods: {
+		// the person signed in or out, or the role changed: the files the sections read may open now (or no longer)
+		onSessionChange() {
+			this.loadCeiling();
+			this.loadTests();
+		},
 		heartbeat() {
 			if (document.hidden || !this.$el || this.$el.isConnected === false) return;
 			api('view.heartbeat', { topic: 'motors' }).catch(() => {});

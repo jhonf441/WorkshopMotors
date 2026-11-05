@@ -78,6 +78,12 @@ export async function withReservation(reserveMotion, text, fn, timers) {
 }
 
 // A sequence refused before it started says so (not "interrupted": nothing moved). '' for any other error.
+// The cause is told apart: motion_denied (somebody else holds the movement), no session (401: signing in fixes it) or a role too
+// low (403: its own message says the role that is needed).
 export function refusedText(e) {
-	return e && e.code === 'motion_denied' ? i18n.t('plugins.WorkshopMotors.common.not_started', { reason: e.message || '' }) : '';
+	const code = e && e.code;
+	if (code === 'motion_denied') return i18n.t('plugins.WorkshopMotors.common.not_started', { reason: e.message || '' });
+	if (code === 'login_required') return ts('lock_signed_out');
+	if (code === 'forbidden') return (e.message ? String(e.message) : '') || ts('err_role');
+	return '';
 }

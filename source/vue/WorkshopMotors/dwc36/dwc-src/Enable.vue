@@ -11,7 +11,7 @@
 			<v-checkbox v-model="understood" dense hide-details class="mt-1 mb-0 pt-0" :disabled="lock.blocked" :label="e('understood_i_will_release_the_motors')" />
 		</v-alert>
 
-		<v-alert v-if="!atLeast('technician')" dense outlined type="info" class="mb-3">{{ e('role_cannot_release') }}</v-alert>
+		<v-alert v-if="releaseLock" dense outlined type="info" class="mb-3">{{ releaseLock }}</v-alert>
 		<v-alert v-if="lock.blocked" dense outlined type="warning" class="mb-3">{{ lock.reason }}</v-alert>
 		<div v-if="textIdle" class="text-caption enabled-faint mb-2">{{ textIdle }}</div>
 
@@ -133,7 +133,7 @@
 // The risk bar and the lights of "motors without force" come from the service (motorReport.released), whoever released
 // them: this page only sends the orders and shows the state.
 
-import { apiText } from './workshop-api.js'
+import { apiTextKeepRefusals } from './motors-api.js'
 import { machineFree } from './machine-free.js'
 import { ts } from './shared-t.js'
 import { serviceText, serviceDefaultKey } from './service-text.js'
@@ -141,6 +141,7 @@ import { motorsOf, block, command, notices, textIdle, noticesLevel4, tap, canUse
 import { ENABLE_COLOR, ENABLE_ICON } from './motor-state.js'
 import { sendMotors, ANSWER_MS } from './motors-send.js'
 import { roleMixin } from './role-mixin.js' // what the role may do (vue/_shared)
+import { signedOut } from './workshop-auth.js'
 
 export default {
 	mixins: [roleMixin],
@@ -174,6 +175,12 @@ export default {
 		// what each button can do depends on the real state of the motor: a holding motor has nothing to enable, a released one nothing to release
 		selMotors() {
 			return this.motors.filter(m => this.sel.indexOf(m.key) >= 0);
+		},
+		// why releasing is locked for this person, told apart by cause: no session (signing in fixes it) or a role below technician
+		releaseLock() {
+			const why = this.lockText('technician');
+			if (!why) return '';
+			return signedOut() ? why : this.e('role_cannot_release') + ' ' + why;
 		},
 		canRelease() {
 			return this.atLeast('technician') && canUse('disable', this.lock, this.understood, this.busy);
@@ -274,7 +281,7 @@ export default {
 		async send(action, keys) {
 			this.busy = true;
 			const seq = this.report && typeof this.report.enabled_seq === 'number' ? this.report.enabled_seq : null;
-			const r = await sendMotors(apiText, action, keys);
+			const r = await sendMotors(apiTextKeepRefusals, action, keys);
 			this.busy = false;
 			if (!r.ok) {
 				this.result = { ok: false, text: r.error };
