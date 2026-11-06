@@ -1,12 +1,12 @@
 <template>
 	<!-- DESIGN.md level 4: the notice stays in view while it lasts and says how to end it -->
-	<v-alert type="error" dense prominent icon="mdi-engine-off" class="mb-3">
+	<div class="mb-3">
+	<v-alert type="error" dense prominent icon="mdi-engine-off" class="mb-1">
 		<div class="d-flex align-center flex-wrap" style="gap:8px">
 			<div class="flex-grow-1" style="min-width:220px">
 				<div class="font-weight-medium">{{ t('banner_title', { list }) }}</div>
 				<div class="text-body-2">{{ t('banner_text') }}</div>
 				<div v-if="lock.blocked" class="text-caption mt-1">{{ lock.reason }}</div>
-				<lock-reason :op="enableOp" need="operator" class="mt-1" />
 				<div v-if="result" class="text-body-2 mt-1">{{ result }}</div>
 			</div>
 			<v-btn
@@ -15,9 +15,12 @@
 			>
 				<v-icon small left>{{ armedNow ? 'mdi-alert' : 'mdi-engine' }}</v-icon>{{ armedNow ? t('banner_tap_again', { list }) : t('banner_enable_all') }}
 			</v-btn>
-			<v-btn small text dark @click="$emit('open')">{{ t('section_release') }}</v-btn>
+			<v-btn small text dark :disabled="!atLeast('operator')" @click="$emit('open')">{{ t('section_release') }}</v-btn>
 		</div>
 	</v-alert>
+	<!-- the role / session reason is OUTSIDE the red box: red is the safety state of the motors, never a refusal -->
+	<lock-reason :op="enableOp" need="operator" />
+	</div>
 </template>
 
 <script>

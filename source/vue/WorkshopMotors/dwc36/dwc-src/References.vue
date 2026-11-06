@@ -2,7 +2,7 @@
 	<div class="mt-4">
 		<div class="text-subtitle-2 d-flex align-center flex-wrap" style="gap:6px">
 			<v-icon small>mdi-table-large</v-icon>{{ $t('plugins.WorkshopMotors.references.references_to_compare') }}
-			<v-chip x-small label outlined :color="shared ? 'success' : 'grey'">{{ shared ? $t('plugins.WorkshopMotors.references.shared_table_up_to_date') : $t('plugins.WorkshopMotors.references.copy_included_in_the_plugin') }}</v-chip>
+			<v-chip x-small label outlined color="grey">{{ $t('plugins.WorkshopMotors.references.copy_included_in_the_plugin') }}</v-chip>
 			<help-tip :title="$t('plugins.WorkshopMotors.references.references_to_compare')">
 				{{ $t('plugins.WorkshopMotors.references.table_note') }}{{ timing ? ' (M569 T' + timing + ')' : '' }}.
 			</help-tip>
@@ -33,16 +33,12 @@
 			</span>
 		</div>
 		<div class="d-flex flex-wrap align-center mt-2" style="gap:8px">
-			<v-btn small outlined :loading="refreshing" @click="update()">
-				<v-icon left small>mdi-refresh</v-icon>{{ $t('plugins.WorkshopMotors.references.update_table') }}
-			</v-btn>
 			<v-btn small outlined @click="download('csv')">
 				<v-icon left small>mdi-download</v-icon>{{ $t('plugins.WorkshopMotors.references.download_csv') }}
 			</v-btn>
 			<v-btn small outlined @click="download('json')">
 				<v-icon left small>mdi-code-json</v-icon>{{ $t('plugins.WorkshopMotors.references.download_json') }}
 			</v-btn>
-			<span class="text-caption grey--text">{{ failed ? $t('plugins.WorkshopMotors.references.update_failed') : (updatedAt ? $t('plugins.WorkshopMotors.references.updated_on', { date: updatedAt.slice(0, 10) }) : '') }}</span>
 			<span v-if="exportMessage" class="text-caption error--text">{{ exportMessage }}</span>
 		</div>
 	</div>
@@ -53,14 +49,12 @@ import i18n from '../../i18n'
 
 'use strict'
 
-// Reference table of the pulse ceiling (2026-10-10, request: "you should
-// leave the reference [dc42] talks about ... in case someone measures it can be
-// updated for everyone"). The copy of references.json travels in the plugin; the
-// shared one lives in the public repo (source/vue/<Id>/dwc-src/references.json)
-// and is read from GitHub. To add a measurement: a notice (issue) with the data.
+// Reference table of the pulse ceiling. references.json travels in the plugin and is the ONLY source: the page makes no
+// request to the internet. To add a measurement the user opens an issue by hand (a link that opens in a new tab); the owner
+// adds the row and the next version of the plugin carries it.
 // Format and texts of the rows: references.js.
 import REF from './references.json'
-import { readTable, caseText, sourceText, shareRow, timingOf, readCache, writeCache, TABLE_URL } from './references.js'
+import { readTable, caseText, sourceText, shareRow, timingOf } from './references.js'
 import { exportReferences } from './export-files.js'
 import { ts } from './shared-t.js'
 import HelpTip from './HelpTip.vue' // vue/_shared36
@@ -76,8 +70,7 @@ export default {
 		report: { type: Object, default: null }
 	},
 	data() {
-		const cached = readCache(window.localStorage);
-		return { rows: cached ? cached.rows : (readTable(REF) || []), shared: !!cached, updatedAt: cached ? cached.at : null, refreshing: false, failed: false, exportMessage: '' };
+		return { rows: readTable(REF) || [], exportMessage: '' };
 	},
 	computed: {
 		model() {
@@ -91,32 +84,8 @@ export default {
 			return timingOf(this.report);
 		}
 	},
-	mounted() {
-		this.load();
-	},
 	methods: {
-		// reads the shared table from the repository; on a failure (no internet, repository not public, file missing) what was shown stays
-		async load() {
-			try {
-				const res = await fetch(TABLE_URL, { cache: 'no-store' });
-				const table = res.ok ? await res.json() : null;
-				const found = readTable(table);
-				if (!found) throw new Error('no table');
-				this.rows = found;
-				this.shared = true;
-				this.failed = false;
-				this.updatedAt = new Date().toISOString();
-				writeCache(window.localStorage, table, this.updatedAt);
-			} catch (e) {
-				this.failed = true;
-			}
-		},
-		async update() {
-			this.refreshing = true;
-			await this.load();
-			this.refreshing = false;
-		},
-		// the table as it is shown now (the shared one or the copy of the plugin) as a file for a spreadsheet or to compare
+		// the table as it is shown now (the copy bundled in the plugin) as a file for a spreadsheet or to compare
 		download(kind) {
 			this.exportMessage = exportReferences(kind, this.rows) ? '' : ts('exchange_export_failed');
 		},

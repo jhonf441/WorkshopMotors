@@ -1,5 +1,11 @@
 # WorkshopMotors (Motors)
 
+<!-- notice:start -->
+> **Read before installing.** This plugin runs with real permissions on your machine. Read [SECURITY.md](SECURITY.md) and the section **Permissions and what it changes** below: they say what it can do, which files it writes, and what it sends outside your network (nothing, unless you turn a feature on).
+
+> **The Workshop users and roles do not protect DWC itself.** Anyone who can open DWC on your network can send G-code, move the machine, edit `config.g` and upload files, whatever the Workshop roles say: Duet has no roles of its own. Set a DWC password (`M551`) and keep the machine on a network you trust.
+<!-- notice:end -->
+
 
 
 Page `/Plugins/Motors`. Shows how the motors are doing (state, current, speed, pulses, RPM, driver status), draws live charts, lets you release or enable motors, and has start-up tools: advisor (speed and acceleration limits per mode), axis test, measure the pulse ceiling of your board and StallGuard crash detection for the free (no-limits) jog.
@@ -232,10 +238,9 @@ Risk: **Medium (its Test tab moves an axis; the stall detection changes the curr
 
 **Files it writes:**
 - its results in `0:/sys/workshop/` (`axis-test.csv`, step ceiling)
-- the saved copy of the shared pulse table in the browser (localStorage)
 
 **Safety notes:**
-- It never writes driver registers (`M569.2` with a value is not in the code). The shared reference table is read from `data/references.json` of this repository.
+- It never writes driver registers (`M569.2` with a value is not in the code). It makes no request to the internet: the pulse reference table travels inside the plugin (`references.json`) and grows with each version. The only external address is the link behind **Share my measurement**, which opens a GitHub issue page in a new tab when you press it.
 
 Uninstalling removes the plugin folder; your data in `0:/sys/workshop/` and `/opt/dsf/conf/workshop-*.json` stays.
 
@@ -245,11 +250,11 @@ Uninstalling removes the plugin folder; your data in `0:/sys/workshop/` and `/op
 
 Local drivers only; RPM uses the steps per revolution you set for each motor (200 when you set none: RRF does not know the motor); pulse capacity is observed, not a datasheet number; StallGuard does not protect people.
 
-## Pulse ceiling reference table (shared with everybody)
+## Pulse ceiling reference table
 
-The "References to compare" table of the Measure tab compares the pulse ceiling you measured with other boards. It comes from ONE file in this repository, [`data/references.json`](data/references.json). The page reads it every time it opens and with the button **Update table**; it keeps the last good copy in the browser, and a copy also travels inside the plugin, so it works with no internet. The line under the table says when it was updated, or that it could not be read (no internet, or the repository is not public yet) and which copy is shown. **Download CSV** and **Download JSON** save the table as it is shown (CSV for a spreadsheet, JSON in the same format as the repository file).
+The "References to compare" table of the Measure tab compares the pulse ceiling you measured with other boards. It comes from a file that travels inside the plugin (`references.json`): the page never downloads it, so it works with no internet and the plugin makes no outbound request. A new version of the plugin brings the new rows. **Download CSV** and **Download JSON** save the table as it is shown (CSV for a spreadsheet, JSON in the same format as the repository file).
 
-To add your measurement: press **Share my measurement** (it opens an issue already filled with your board, firmware, timing, axis and ceiling in kHz). The owner adds the row to `data/references.json` and everybody gets it the next time the page opens.
+To add your measurement: press **Share my measurement** (it opens an issue already filled with your board, firmware, timing, axis and ceiling in kHz). Nothing is sent until you submit the issue on GitHub. The owner adds the row to the table and everybody gets it with the next version of the plugin.
 
 ## Files this page downloads
 
@@ -278,4 +283,4 @@ Every file is named `<name>-<YYYYMMDD-HHMMSS>.<extension>` (local time of the br
 
 **References, spreadsheet (`workshop-ceiling-pulses-...csv`).** The same layout, one row per row of the table: `board`, `firmware`, `timing`, `motors`, `moves` (`long` or `short`; empty for a row written by hand), `axis`, `micro`, `khz` (ceiling per motor), `source`, `date`, `test_case` (the case of a row written by hand).
 
-**References, JSON (`workshop-ceiling-pulses-...json`).** The layout of the repository file `data/references.json`: `{ "format": "workshop-ceiling-pulses", "version": 2, "rows": [...] }`, with no envelope. It is a table shared by many machines that the owner edits by hand and every copy of the plugin reads from GitHub, so it keeps its own versioned layout; the download is a file you can compare with the repository one.
+**References, JSON (`workshop-ceiling-pulses-...json`).** The layout of the bundled file `references.json`: `{ "format": "workshop-ceiling-pulses", "version": 2, "rows": [...] }`, with no envelope. It is a table shared by many machines that the owner edits by hand and ships with each version, so it keeps its own versioned layout; the download is a file you can compare with the repository one.

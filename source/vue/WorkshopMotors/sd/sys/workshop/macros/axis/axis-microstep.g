@@ -1,7 +1,7 @@
-; sys/workshop/macros/axis-microstep.g -- WorkshopMotors: sets the microstepping (M350) of ONE
+; sys/workshop/macros/axis/axis-microstep.g -- WorkshopMotors: sets the microstepping (M350) of ONE
 ; axis by its letter. RRF adjusts the steps/mm by itself, so the position in mm
 ; does not change (it can shift a fraction of a step: home afterwards).
-; Use: M98 P"0:/sys/workshop/macros/axis-microstep.g" L"X" M256 I1
+; Use: M98 P"0:/sys/workshop/macros/axis/axis-microstep.g" L"X" M256 I1
 
 if !exists(param.L) || !exists(param.M)
   abort "axis-microstep: L or M missing"

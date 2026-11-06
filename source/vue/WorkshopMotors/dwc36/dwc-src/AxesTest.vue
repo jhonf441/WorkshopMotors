@@ -364,7 +364,7 @@ export default {
 						const mt = sequenceBlock(this.$store.state.machine.model);
 						if (mt) throw new Error(mt);
 						const reply = await this.sendCode({
-							code: `M98 P"0:/sys/workshop/macros/axis-test.g" A"${letter}" F${p.speed} C${p.accel} D${Math.round(this.dist)} N${Math.round(this.reps)}`,
+							code: `M98 P"0:/sys/workshop/macros/axis/axis-test.g" A"${letter}" F${p.speed} C${p.accel} D${Math.round(this.dist)} N${Math.round(this.reps)}`,
 							log: true
 						});
 						if (/error|abort/i.test(reply || '')) {
@@ -425,7 +425,7 @@ export default {
 				const g = this.globals;
 				const e = g.workshopTestAxis;
 					if (/^[XYZUVWABC]$/.test(e || '') && g.workshopTestMode === this.mode) {
-						await this.sendCode({ code: `M98 P"0:/sys/workshop/macros/axis-limits.g" L"${e}" V${g.workshopTestV} C${g.workshopTestAcc}`, log: true });
+						await this.sendCode({ code: `M98 P"0:/sys/workshop/macros/axis/axis-limits.g" L"${e}" V${g.workshopTestV} C${g.workshopTestAcc}`, log: true });
 					}
 				await this.sendCode({ code: 'set global.workshopTestPending = false', log: false });
 			} finally {

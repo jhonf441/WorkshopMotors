@@ -1,9 +1,9 @@
-; sys/workshop/macros/axis-move.g -- WorkshopMotors: moves ONE axis by its letter (the
+; sys/workshop/macros/axis/axis-move.g -- WorkshopMotors: moves ONE axis by its letter (the
 ; G-codes do not take the axis letter from a variable, so it branches).
 ;   L axis letter ("X","Y","Z","U","V","W","A","B","C")
 ;   P MACHINE position (G53) to go to
 ;   F speed mm/min
-; Use: M98 P"0:/sys/workshop/macros/axis-move.g" L"U" P100 F3000
+; Use: M98 P"0:/sys/workshop/macros/axis/axis-move.g" L"U" P100 F3000
 ; Every G1 carries S0 (in Laser mode a G1 with S turns the laser on).
 
 if !exists(param.L) || !exists(param.P) || !exists(param.F)

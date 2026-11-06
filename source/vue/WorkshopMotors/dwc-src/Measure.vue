@@ -322,7 +322,7 @@ async function measureCeiling() {
 				const mt = sequenceBlock(machineModel())
 				if (mt) throw new Error(mt)
 				stateT.value = i18n.t('plugins.WorkshopMotors.measure.step_n_of_total', { n: k + 1, total: todo.length, khz: t.khz, v: t.speed, micro: MICRO })
-				const reply = await send(`M98 P"0:/sys/workshop/macros/step-ceiling.g" A"${letter}" F${t.speed} D${Math.round(distT.value)} N3 M${MICRO}`)
+				const reply = await send(`M98 P"0:/sys/workshop/macros/axis/step-ceiling.g" A"${letter}" F${t.speed} D${Math.round(distT.value)} N3 M${MICRO}`)
 				if (/error|abort/i.test(reply || '')) throw new Error(reply)
 				const total = await hiccupsAfter(props.report.m122_seq)
 				const added = total - base
@@ -374,7 +374,7 @@ function firmware() {
 async function restoreCeiling() {
 	restoring.value = true
 	try {
-		await send('M98 P"0:/sys/workshop/macros/step-ceiling.g" R1')
+		await send('M98 P"0:/sys/workshop/macros/axis/step-ceiling.g" R1')
 	} finally {
 		restoring.value = false
 	}

@@ -334,7 +334,7 @@ export default {
 						const mt = sequenceBlock(this.$store.state.machine.model);
 						if (mt) throw new Error(mt);
 						this.stateT = i18n.t('plugins.WorkshopMotors.measure.step_n_of_total', { n: k + 1, total: segments.length, khz: t.khz, v: t.speed, micro: this.MICRO });
-						const reply = await this.sendCode({ code: `M98 P"0:/sys/workshop/macros/step-ceiling.g" A"${letter}" F${t.speed} D${Math.round(this.distT)} N3 M${this.MICRO}`, log: true });
+						const reply = await this.sendCode({ code: `M98 P"0:/sys/workshop/macros/axis/step-ceiling.g" A"${letter}" F${t.speed} D${Math.round(this.distT)} N3 M${this.MICRO}`, log: true });
 						if (/error|abort/i.test(reply || '')) throw new Error(reply);
 						const total = await this.hiccupsAfter(this.report.m122_seq);
 						const added = total - base;
@@ -386,7 +386,7 @@ export default {
 		async restoreCeiling() {
 			this.restoring = true;
 			try {
-				await this.sendCode({ code: 'M98 P"0:/sys/workshop/macros/step-ceiling.g" R1', log: true });
+				await this.sendCode({ code: 'M98 P"0:/sys/workshop/macros/axis/step-ceiling.g" R1', log: true });
 			} finally {
 				this.restoring = false;
 			}

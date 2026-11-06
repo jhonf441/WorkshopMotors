@@ -1,4 +1,4 @@
-; sys/workshop/macros/axis-test.g -- WorkshopMotors (Motors page > Test)
+; sys/workshop/macros/axis/axis-test.g -- WorkshopMotors (Motors page > Test)
 ; Lost steps test of ONE axis at a given speed/acceleration:
 ;   1. measures the reference of the axis:
 ;        - axes with a physical endstop (X, Y, new axes): where the
@@ -13,7 +13,7 @@
 ; before 2026-10-13 keep their Spanish header; the page reads the columns by position).
 ;
 ; THIS MOVES THE MACHINE. Needs the axis homed (and X/Y/Z for Z).
-; Use: M98 P"0:/sys/workshop/macros/axis-test.g" A"X" F12000 C1000 D300 N5
+; Use: M98 P"0:/sys/workshop/macros/axis/axis-test.g" A"X" F12000 C1000 D300 N5
 ;   A axis letter, F speed mm/min, C acceleration mm/s2,
 ;   D travel mm (cut to the length of the axis), N back-and-forth runs
 
@@ -29,14 +29,14 @@ if !exists(global.workshopTestMode)
   global workshopTestMode = ""
 if !exists(global.workshopTestLast)
   global workshopTestLast = ""
-var en = exists(global.workshopLanguage) ? (global.workshopLanguage == "en") : false   ; messages in English (DWC language, see sys/workshop/macros/language.g)
+var en = exists(global.workshopLanguage) ? (global.workshopLanguage == "en") : false   ; messages in English (DWC language, see sys/workshop/macros/system/language.g)
 
 ; A previous test that was cut (Stop, error) left the test limits
 ; set: restore them, unless the mode changed (the mode file
 ; already set its own).
 if global.workshopTestPending
   if global.workshopTestMode == state.machineMode && global.workshopTestAxis != ""
-    M98 P"0:/sys/workshop/macros/axis-limits.g" L{global.workshopTestAxis} V{global.workshopTestV} C{global.workshopTestAcc}
+    M98 P"0:/sys/workshop/macros/axis/axis-limits.g" L{global.workshopTestAxis} V{global.workshopTestV} C{global.workshopTestAcc}
   set global.workshopTestPending = false
 
 if state.status == "processing" || state.status == "paused" || state.status == "pausing" || state.status == "resuming" || state.status == "simulating"
@@ -96,9 +96,9 @@ if var.zUp > 0
   G90
 
 if var.metodo == "switch"
-  M98 P"0:/sys/workshop/macros/axis-measure.g" A{param.A}
+  M98 P"0:/sys/workshop/macros/axis/axis-measure.g" A{param.A}
 else
-  M98 P"0:/sys/workshop/macros/axis-probe.g"
+  M98 P"0:/sys/workshop/macros/axis/axis-probe.g"
 var antes = global.workshopMeasurement
 
 ; test limits (the current ones are saved in case it is cut)
@@ -109,22 +109,22 @@ set global.workshopTestV = var.vPrev
 set global.workshopTestAcc = var.aPrev
 set global.workshopTestMode = state.machineMode
 set global.workshopTestPending = true
-M98 P"0:/sys/workshop/macros/axis-limits.g" L{param.A} V{max(var.vel, var.vPrev)} C{var.acc}
-M98 P"0:/sys/workshop/macros/axis-move.g" L{param.A} P{var.inicio} F{min(3000, max(var.vPrev, 300))}
+M98 P"0:/sys/workshop/macros/axis/axis-limits.g" L{param.A} V{max(var.vel, var.vPrev)} C{var.acc}
+M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.inicio} F{min(3000, max(var.vPrev, 300))}
 
 while iterations < var.reps
-  M98 P"0:/sys/workshop/macros/axis-move.g" L{param.A} P{var.inicio + var.dist} F{var.vel}
-  M98 P"0:/sys/workshop/macros/axis-move.g" L{param.A} P{var.inicio} F{var.vel}
+  M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.inicio + var.dist} F{var.vel}
+  M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.inicio} F{var.vel}
 M400
 
 ; restore the limits
-M98 P"0:/sys/workshop/macros/axis-limits.g" L{param.A} V{var.vPrev} C{var.aPrev}
+M98 P"0:/sys/workshop/macros/axis/axis-limits.g" L{param.A} V{var.vPrev} C{var.aPrev}
 set global.workshopTestPending = false
 
 if var.metodo == "switch"
-  M98 P"0:/sys/workshop/macros/axis-measure.g" A{param.A}
+  M98 P"0:/sys/workshop/macros/axis/axis-measure.g" A{param.A}
 else
-  M98 P"0:/sys/workshop/macros/axis-probe.g"
+  M98 P"0:/sys/workshop/macros/axis/axis-probe.g"
 var despues = global.workshopMeasurement
 var dif = var.despues - var.antes
 

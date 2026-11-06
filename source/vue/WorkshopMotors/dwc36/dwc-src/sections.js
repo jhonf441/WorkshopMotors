@@ -4,7 +4,7 @@
 // Two groups (F3-V, 2026-10-21): HEALTH (state, details, charts, releasing the motors) and COMMISSIONING (what changes or moves
 // the machine). label / group: keys relative to plugins.WorkshopMotors, translated when the bar is drawn.
 
-import { visibleItems, pickAllowed } from './role-view.js'
+import { visibleItems, pickAllowed, lockedItems, lockedNeed } from './role-view.js'
 
 // `min` = the lowest role that sees the section (role-view.js; none = everybody). Health is for everybody; commissioning
 // (Advisor, Test, Measure, Crash: they change the configuration or move the machine) is for a technician or an administrator.
@@ -36,6 +36,12 @@ export function restoreSection(stored) {
 }
 
 // The items of the side bar; t(key) = the page's translator (key relative to plugins.WorkshopMotors)
+// ALL the sections: the ones above the role carry `locked: <role that opens it>` (the bar draws them with a lock; opening one shows the cover)
 export function sideItems(t, can) {
-	return visibleSections(can).map(s => ({ id: s.id, icon: s.icon, label: t(s.label), group: t(s.group) }));
+	return lockedItems(SECTIONS, can).map(s => Object.assign({ id: s.id, icon: s.icon, label: t(s.label), group: t(s.group) }, s.locked ? { locked: s.locked } : {}));
+}
+
+// the role that opens the section `id`, or '' when the role may open it
+export function lockedSection(id, can) {
+	return lockedNeed(SECTIONS, id, can);
 }

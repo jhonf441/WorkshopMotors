@@ -41,9 +41,10 @@
 			<v-icon small>mdi-axis-arrow</v-icon>{{ moveText }}
 			<v-chip v-if="limited" x-small outlined color="warning">{{ t('move_limited') }}</v-chip>
 		</div>
-		<v-btn small text class="mt-2 px-1" @click="$emit('release')">
+		<v-btn small text class="mt-2 px-1" :disabled="!atLeast('operator')" @click="$emit('release')">
 			<v-icon small left>mdi-engine-off-outline</v-icon>{{ t('to_release') }}
 		</v-btn>
+		<lock-reason min="operator" class="mt-1" />
 	</div>
 </template>
 
@@ -57,8 +58,12 @@
 import { ENABLE_COLOR, ENABLE_ICON } from './motor-state.js'
 import { faultLabel, faultHint } from './faults.js'
 import { num, smart } from './format.js'
+import { roleMixin } from './role-mixin.js' // what the role may do (vue/_shared36)
+import LockReason from './LockReason.vue' // vue/_shared36
 
 export default {
+	components: { LockReason },
+	mixins: [roleMixin],
 	props: {
 		motors: { type: Array, required: true },
 		report: { type: Object, default: null },

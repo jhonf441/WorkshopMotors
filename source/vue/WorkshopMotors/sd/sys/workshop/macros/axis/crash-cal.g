@@ -1,4 +1,4 @@
-; sys/workshop/macros/crash-cal.g -- WorkshopMotors (Motors page > Crash)
+; sys/workshop/macros/axis/crash-cal.g -- WorkshopMotors (Motors page > Crash)
 ; Calibrates the sensitivity of the stall detection (StallGuard, M915) used by
 ; the "without limits" mode of the jog (request 2026-10-10: "I put my hand to stop it
 ; and the motor did not stop").
@@ -11,7 +11,7 @@
 ; global.crashCalHit: it stops nothing.
 ;
 ; THIS MOVES THE MACHINE. Needs the axis homed. Laser off (S0).
-; Use: M98 P"0:/sys/workshop/macros/crash-cal.g" A"X" V25 W15 C50 H100 S16 B-12 L120
+; Use: M98 P"0:/sys/workshop/macros/axis/crash-cal.g" A"X" V25 W15 C50 H100 S16 B-12 L120
 ;   A axis (X or Y), V test speed mm/s (the maximum of the without-limits mode),
 ;   W second speed mm/s (slower, 0 = no), C current %, H minimum full
 ;   steps/s of M915, S initial sensitivity (the least sensitive),
@@ -42,7 +42,7 @@ if global.crashCalPending != ""
   set global.crashCal = false
   set global.crashCalPending = ""
 
-var en = exists(global.workshopLanguage) ? (global.workshopLanguage == "en") : false   ; messages in English (DWC language, see sys/workshop/macros/language.g)
+var en = exists(global.workshopLanguage) ? (global.workshopLanguage == "en") : false   ; messages in English (DWC language, see sys/workshop/macros/system/language.g)
 if !exists(param.A) || (param.A != "X" && param.A != "Y")
   abort {var.en ? ("Crash calibration: A has to be X or Y") : ("Calibrar choque: A tiene que ser X o Y")}
 if state.status == "processing" || state.status == "paused" || state.status == "simulating"

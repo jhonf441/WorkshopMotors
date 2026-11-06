@@ -3,15 +3,15 @@
 // Reference table of the pulse ceiling (Measure tab, References.vue). Pure functions (without Vue) so they can be
 // tested with node: test/references.test.js.
 //
-// The table travels in the plugin (references.json) and the shared copy lives in the public repo; both have the same
-// format. A row says WHAT was measured as data (motors + kind of moves), not as a sentence, so it is shown in the
+// The table travels inside the plugin (references.json) and is the only source: the page never downloads it. The
+// format of a row is as follows. A row says WHAT was measured as data (motors + kind of moves), not as a sentence, so it is shown in the
 // language of each DWC: { board, firmware, timing, motors, moves: 'long' | 'short', axis?, micro?, khz, source, date? }.
 // source: 'dc42' (his public sheet) or 'measured' (a user of this plugin, through the "Share" button).
 
 export const FORMAT = 'workshop-ceiling-pulses';
 export const VERSION = 2;
 
-// The rows of a table read from the plugin or from GitHub, or null when the data is not a table of this format.
+// The rows of a table read from the plugin, or null when the data is not a table of this format.
 export function readTable(json) {
 	if (!json || typeof json !== 'object' || json.format !== FORMAT || !Array.isArray(json.rows)) {
 		return null;
@@ -45,7 +45,7 @@ export function sourceText(row, t) {
 	return row.source === 'measured' ? t('references.source_measured') : String(row.source || '');
 }
 
-// The row a user shares from the Measure tab (it goes in the GitHub issue as JSON, ready to paste in the table).
+// The row a user shares from the Measure tab (it goes in the issue the user opens by hand, as JSON, ready to paste in the table).
 // ceiling: the saved step-ceiling.json; board / firmware / timing: what this machine reports.
 export function shareRow(ceiling, board, firmware, timing) {
 	const c = ceiling || {};
@@ -75,32 +75,7 @@ export function timingOf(report) {
 	return null;
 }
 
-// ---- the shared table: where it is read from, the offline copy and the download ----
-
-// The table everybody shares: ONE file at the root of the repository of the plugin (data/references.json). The page reads it from there on
-// opening and with "Update table"; the last good copy is kept in the browser, so it keeps working with no internet; without both the copy
-// that travels in the plugin is shown. Anyone's measurement goes in through the "Share" button (an issue) and the owner adds the row to that file.
-export const TABLE_URL = 'https://raw.githubusercontent.com/jhonf441/WorkshopMotors/main/data/references.json';
-const CACHE_KEY = 'workshopMotorsReferences';
-
-// The last table read from the repository: { rows, at } or null (no storage / nothing saved / not a table of this format)
-export function readCache(storage) {
-	try {
-		const saved = JSON.parse(storage.getItem(CACHE_KEY));
-		const rows = readTable(saved && saved.table);
-		return rows ? { rows, at: saved.at || null } : null;
-	} catch (e) {
-		return null;
-	}
-}
-
-export function writeCache(storage, table, at) {
-	try {
-		storage.setItem(CACHE_KEY, JSON.stringify({ table, at }));
-	} catch (e) {
-		/* private window or full: the table is just not kept */
-	}
-}
+// ---- the table: the copy bundled in the plugin and the downloads ----
 
 // The CSV of the table (exchange standard, docs-internal/DATA-EXCHANGE.md): one row per row of the table, these columns, in this order.
 // board, firmware, timing, source: texts as the table has them; motors: how many motors moved; moves: 'long' | 'short' (empty for a row typed by hand,
@@ -114,8 +89,8 @@ export function tableToCsv(rows) {
 }
 
 // The rows as the file of the table: the layout the repository holds (data/references.json), { format, version, rows }, WITHOUT the envelope of
-// the exchange standard. It is a catalog shared by many machines, not the data of one: every copy of the plugin reads it from GitHub and the owner
-// edits it by hand, so it keeps its own versioned layout (docs-internal/DATA-EXCHANGE.md, "Files that keep their own layout").
+// the exchange standard. It is a catalog shared by many machines, not the data of one: the owner
+// edits it by hand and ships it with each version of the plugin, so it keeps its own versioned layout (docs-internal/DATA-EXCHANGE.md, "Files that keep their own layout").
 export function tableToJson(rows) {
 	return JSON.stringify({ format: FORMAT, version: VERSION, rows: rows || [] }, null, 2) + '\n';
 }

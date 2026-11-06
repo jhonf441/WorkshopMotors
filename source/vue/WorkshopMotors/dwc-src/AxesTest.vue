@@ -336,7 +336,7 @@ async function run() {
 				// it is checked again before each step (not only when drawing the button)
 				const mt = sequenceBlock(machineModel())
 				if (mt) throw new Error(mt)
-				const reply = await send(`M98 P"0:/sys/workshop/macros/axis-test.g" A"${letter}" F${p.speed} C${p.accel} D${Math.round(dist.value)} N${Math.round(reps.value)}`, true)
+				const reply = await send(`M98 P"0:/sys/workshop/macros/axis/axis-test.g" A"${letter}" F${p.speed} C${p.accel} D${Math.round(dist.value)} N${Math.round(reps.value)}`, true)
 				if (/error|abort/i.test(reply || '')) {
 					throw new Error(reply)
 				}
@@ -395,7 +395,7 @@ async function restore() {
 		const g = props.globals
 		const e = g.workshopTestAxis
 		if (/^[XYZUVWABC]$/.test(e || '') && g.workshopTestMode === props.mode) {
-			await send(`M98 P"0:/sys/workshop/macros/axis-limits.g" L"${e}" V${g.workshopTestV} C${g.workshopTestAcc}`, true)
+			await send(`M98 P"0:/sys/workshop/macros/axis/axis-limits.g" L"${e}" V${g.workshopTestV} C${g.workshopTestAcc}`, true)
 		}
 		await send('set global.workshopTestPending = false', false)
 	} finally {

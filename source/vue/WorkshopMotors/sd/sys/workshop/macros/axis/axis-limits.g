@@ -1,6 +1,6 @@
-; sys/workshop/macros/axis-limits.g -- WorkshopMotors: sets M203 (maximum speed,
+; sys/workshop/macros/axis/axis-limits.g -- WorkshopMotors: sets M203 (maximum speed,
 ; mm/min) and M201 (acceleration, mm/s2) of ONE axis by its letter.
-; Use: M98 P"0:/sys/workshop/macros/axis-limits.g" L"Z" V600 C100
+; Use: M98 P"0:/sys/workshop/macros/axis/axis-limits.g" L"Z" V600 C100
 
 if !exists(param.L) || !exists(param.V) || !exists(param.C)
   abort "axis-limits: L, V or C missing"

@@ -1,5 +1,25 @@
 # WorkshopMotors -- historial de versiones
 
+## 2.6.26 -- 2026-11-06
+
+- Side bar and session: the bar follows the session, the real icon with a small lock, the needed role under the name; a page follows a sign-in made in another tab
+
+## 2.6.25 -- 2026-11-06
+
+- Duet3D review: the plugin no longer fetches anything from GitHub at run time. The pulse reference table (references.json) travels inside the plugin and is the only source; removed the "Update table" button, the browser copy (localStorage) and the shared-table chip/messages. "Share my measurement" stays as a link the user opens by hand
+
+## 2.6.24 -- 2026-11-06
+
+- Roles y permisos: una razon por grupo, rechazos nunca en rojo, controles bloqueados visibles, secciones con candado, permisos con allow/deny
+
+## 2.6.23 -- 2026-11-06
+
+- Macros of sys/workshop/macros are now in folders (axis, zcal, focus, work, guard, laser, probe, system); install together with the service and the SD migration
+
+## 2.6.22 -- 2026-11-06
+
+- Roles y permisos: secciones con candado y cubierta que dice el rol, sin modal ni tarjeta de sesion automaticos, apagado total para todos, Puesta en marcha gris por rol
+
 ## 2.6.21 -- 2026-11-05
 
 - QA batch: idle extruders marked unused in laser and CNC, estimated speed badge

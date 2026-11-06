@@ -1,7 +1,7 @@
-; sys/workshop/macros/axis-touch.g -- WorkshopMotors: moves ONE axis D mm (relative) with
+; sys/workshop/macros/axis/axis-touch.g -- WorkshopMotors: moves ONE axis D mm (relative) with
 ; G1 H4: it stops when its endstop triggers and UPDATES the position (it does not
 ; overwrite it with the limit, like H1), so lost steps can be seen.
-; Use: M98 P"0:/sys/workshop/macros/axis-touch.g" L"X" D-20
+; Use: M98 P"0:/sys/workshop/macros/axis/axis-touch.g" L"X" D-20
 
 if !exists(param.L) || !exists(param.D)
   abort "axis-touch: L or D missing"

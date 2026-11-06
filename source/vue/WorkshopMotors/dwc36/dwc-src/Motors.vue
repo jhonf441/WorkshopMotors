@@ -14,14 +14,14 @@
 		</page-header>
 		<!-- level 4 (DESIGN.md 5): motors without holding force, visible in every section while it lasts -->
 		<released-band v-if="summary.released.length" :keys="summary.released" :report="report" :om="model" :live-job="liveJob" @open="goSection('release')" />
-		<hidden-note :sections="allSections" />
 		<div class="mb-3">
 			<div>
 				<div class="st-layout">
 					<side-tabs v-model="section" :items="sections" />
 					<!-- one section at a time, mounted only while it is open (DESIGN.md 3) -->
 					<div class="st-body">
-						<state-section v-if="section === 'state'" :motors="motors" :report="report" :fresh="fresh" :mode="modeMachine" @release="goSection('release')" />
+						<locked-cover v-if="lockedNow" :needed="lockedNow" />
+						<state-section v-else-if="section === 'state'" :motors="motors" :report="report" :fresh="fresh" :mode="modeMachine" @release="goSection('release')" />
 						<details-section v-else-if="section === 'details'" :report="report" :ceiling="ceiling" @charts="openCharts" />
 						<charts-section v-else-if="section === 'charts'" :report="report" :om="model" :ceiling="ceiling" :preselect="chartsPreselect" />
 						<advisor-section v-else-if="section === 'advisor'" :report="report" :axes="axesOM" :mode-current="modeMachine" :vin="vin" :tests="tests" :ceiling="ceiling" />
@@ -49,7 +49,7 @@ import StartupPanel from './StartupPanel.vue' // start-up card (vue/_shared)
 import PageHeader from './PageHeader.vue' // header of every page (vue/_shared)
 import { levelOfColor } from './page-health.js'
 import SideTabs from './SideTabs.vue'
-import HiddenNote from './HiddenNote.vue' // the quiet line for the sections this role does not see (vue/_shared36)
+import LockedCover from './LockedCover.vue' // the cover of a section the role cannot open (vue/_shared36)
 import StateSection from './StateSection.vue'
 import DetailsSection from './Details.vue'
 import ChartsSection from './Charts.vue'
@@ -64,7 +64,7 @@ import { roleMixin } from './role-mixin.js' // what the role sees (vue/_shared)
 import { rowsMotors, MACROS_DIR } from './startup-rows.js'
 import { freshness, motorStates, pageSummary } from './motor-state.js'
 import { parseTestsCsv } from './report-view.js'
-import { restoreSection, sideItems, allowedSection, SECTIONS } from './sections.js'
+import { restoreSection, sideItems, lockedSection, allowedSection, SECTIONS } from './sections.js'
 import { start as startRecord } from './record.js'
 import { pluginOf } from './workshop-ids.js'
 import { api } from './workshop-api.js'
@@ -87,7 +87,7 @@ export default {
 	mixins: [roleMixin],
 	// what the files of the machine gave to the person who left (the step ceiling, the saved tests, the macros) is read again for the new one (ESTANDAR 3)
 	sessionData: ['ceiling', 'tests', 'chartsPreselect', 'startupMacros'],
-	components: { PageHeader, ControlHolderChip, ServiceNotice, StartupPanel, SideTabs, HiddenNote, StateSection, DetailsSection, ChartsSection, AdvisorSection, EnableSection, AxesTest, MeasureSection, CrashSection, ReleasedBand },
+	components: { PageHeader, ControlHolderChip, ServiceNotice, StartupPanel, SideTabs, LockedCover, StateSection, DetailsSection, ChartsSection, AdvisorSection, EnableSection, AxesTest, MeasureSection, CrashSection, ReleasedBand },
 	data() {
 		return {
 			section: readSection(),
@@ -148,6 +148,10 @@ export default {
 		},
 		sections() {
 			return sideItems(k => this.$t('plugins.WorkshopMotors.' + k), op => this.canDo(op));
+		},
+		// the role that opens the open section, or '' when this role may
+		lockedNow() {
+			return lockedSection(this.section, op => this.canDo(op));
 		},
 		// start-up card: drivers in the report of the service and the macros of the plugin
 		rowsStartup() {

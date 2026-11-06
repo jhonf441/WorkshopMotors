@@ -1,10 +1,10 @@
-; sys/workshop/macros/axis-probe.g -- WorkshopMotors (Motors page > Test, Z axis)
+; sys/workshop/macros/axis/axis-probe.g -- WorkshopMotors (Motors page > Test, Z axis)
 ; For the axis that uses the probe as endstop (Z with BLTouch): measures
 ; with G30 S-1 the bed WHERE the head IS (it does not move X/Y; it touches at
 ; head + probe offset) and WITHOUT changing Z: it only reports at what height it
 ; triggered. If Z lost steps between two measurements, the height changes.
 ; Result in global.workshopMeasurement (mm, in the current Z frame).
-; Use: M98 P"0:/sys/workshop/macros/axis-probe.g"
+; Use: M98 P"0:/sys/workshop/macros/axis/axis-probe.g"
 
 if !exists(global.workshopMeasurement)
   global workshopMeasurement = 0

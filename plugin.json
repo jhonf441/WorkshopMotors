@@ -2,7 +2,7 @@
   "id": "WorkshopMotors",
   "name": "Motors",
   "author": "jhonf441",
-  "version": "2.6.21",
+  "version": "2.6.26",
   "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/jhonf441/WorkshopMotors",
   "tags": [
@@ -17,20 +17,20 @@
   "sbcDsfVersion": "3.6",
   "data": {},
   "sdFiles": [
-    "sys/workshop/macros/axis-limits.g",
-    "sys/workshop/macros/axis-measure.g",
-    "sys/workshop/macros/axis-microstep.g",
-    "sys/workshop/macros/axis-move.g",
-    "sys/workshop/macros/axis-probe.g",
-    "sys/workshop/macros/axis-test.g",
-    "sys/workshop/macros/axis-touch.g",
-    "sys/workshop/macros/crash-cal.g",
-    "sys/workshop/macros/step-ceiling.g"
+    "sys/workshop/macros/axis/axis-limits.g",
+    "sys/workshop/macros/axis/axis-measure.g",
+    "sys/workshop/macros/axis/axis-microstep.g",
+    "sys/workshop/macros/axis/axis-move.g",
+    "sys/workshop/macros/axis/axis-probe.g",
+    "sys/workshop/macros/axis/axis-test.g",
+    "sys/workshop/macros/axis/axis-touch.g",
+    "sys/workshop/macros/axis/crash-cal.g",
+    "sys/workshop/macros/axis/step-ceiling.g"
   ],
   "dwcFiles": [
-    "css/WorkshopMotors.8cb4a4c8.css",
-    "css/WorkshopMotors.8cb4a4c8.css.gz",
-    "js/WorkshopMotors.c132c440.js",
-    "js/WorkshopMotors.c132c440.js.gz"
+    "css/WorkshopMotors.f636ad19.css",
+    "css/WorkshopMotors.f636ad19.css.gz",
+    "js/WorkshopMotors.8935dd72.js",
+    "js/WorkshopMotors.8935dd72.js.gz"
   ]
 }

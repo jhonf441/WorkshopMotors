@@ -1,4 +1,4 @@
-; sys/workshop/macros/step-ceiling.g -- WorkshopMotors (Motors > Measure > Step
+; sys/workshop/macros/axis/step-ceiling.g -- WorkshopMotors (Motors > Measure > Step
 ; ceiling). One run of the measurement of the REAL step rate ceiling of the board:
 ;   1. raises the microstepping of the axis to M (e.g. 256): the board has to generate
 ;      many more pulses per mm, so high rates are reached with the axis
@@ -11,7 +11,7 @@
 ;
 ; THIS MOVES THE MACHINE. Needs the axis homed. After measuring it is worth
 ; homing (going back to the normal microstepping can shift a fraction).
-; Use: M98 P"0:/sys/workshop/macros/step-ceiling.g" A"X" F9000 D300 N3 M256
+; Use: M98 P"0:/sys/workshop/macros/axis/step-ceiling.g" A"X" F9000 D300 N3 M256
 
 if !exists(global.workshopCeilingPending)
   global workshopCeilingPending = false
@@ -31,14 +31,14 @@ if !exists(global.workshopCeilingMode)
 ; a previous run that was cut left the test microstepping/limits: restore
 if global.workshopCeilingPending
   if global.workshopCeilingMode == state.machineMode && global.workshopCeilingAxis != ""
-    M98 P"0:/sys/workshop/macros/axis-microstep.g" L{global.workshopCeilingAxis} M{global.workshopCeilingMicro} I{global.workshopCeilingInterp}
-    M98 P"0:/sys/workshop/macros/axis-limits.g" L{global.workshopCeilingAxis} V{global.workshopCeilingV} C{global.workshopCeilingAcc}
+    M98 P"0:/sys/workshop/macros/axis/axis-microstep.g" L{global.workshopCeilingAxis} M{global.workshopCeilingMicro} I{global.workshopCeilingInterp}
+    M98 P"0:/sys/workshop/macros/axis/axis-limits.g" L{global.workshopCeilingAxis} V{global.workshopCeilingV} C{global.workshopCeilingAcc}
   set global.workshopCeilingPending = false
 
 if exists(param.R)
   M99                                           ; R1 = only restore
 
-var en = exists(global.workshopLanguage) ? (global.workshopLanguage == "en") : false   ; messages in English (DWC language, see sys/workshop/macros/language.g)
+var en = exists(global.workshopLanguage) ? (global.workshopLanguage == "en") : false   ; messages in English (DWC language, see sys/workshop/macros/system/language.g)
 if state.status == "processing" || state.status == "paused" || state.status == "pausing" || state.status == "resuming" || state.status == "simulating"
   abort {var.en ? ("Step ceiling: a job is running") : ("Techo de pulsos: hay un trabajo en curso")}
 if state.status == "halted" || state.status == "off"
@@ -79,7 +79,7 @@ if var.zUp > 0
   G1 Z{var.zUp} F600 S0
   G90
 
-M98 P"0:/sys/workshop/macros/axis-move.g" L{param.A} P{var.inicio} F3000
+M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.inicio} F3000
 M400
 
 set global.workshopCeilingAxis = param.A
@@ -89,15 +89,15 @@ set global.workshopCeilingV = var.vPrev
 set global.workshopCeilingAcc = var.aPrev
 set global.workshopCeilingMode = state.machineMode
 set global.workshopCeilingPending = true
-M98 P"0:/sys/workshop/macros/axis-microstep.g" L{param.A} M{param.M} I1
+M98 P"0:/sys/workshop/macros/axis/axis-microstep.g" L{param.A} M{param.M} I1
 
 while iterations < var.reps
-  M98 P"0:/sys/workshop/macros/axis-move.g" L{param.A} P{var.inicio + var.dist} F{var.vel}
-  M98 P"0:/sys/workshop/macros/axis-move.g" L{param.A} P{var.inicio} F{var.vel}
+  M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.inicio + var.dist} F{var.vel}
+  M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.inicio} F{var.vel}
 M400
 
-M98 P"0:/sys/workshop/macros/axis-microstep.g" L{param.A} M{global.workshopCeilingMicro} I{global.workshopCeilingInterp}
-M98 P"0:/sys/workshop/macros/axis-limits.g" L{param.A} V{var.vPrev} C{var.aPrev}
+M98 P"0:/sys/workshop/macros/axis/axis-microstep.g" L{param.A} M{global.workshopCeilingMicro} I{global.workshopCeilingInterp}
+M98 P"0:/sys/workshop/macros/axis/axis-limits.g" L{param.A} V{var.vPrev} C{var.aPrev}
 set global.workshopCeilingPending = false
 
 if var.zUp > 0

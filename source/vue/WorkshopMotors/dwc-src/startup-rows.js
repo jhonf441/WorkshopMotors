@@ -6,7 +6,7 @@
 //
 // The macros are the plugin's OWN files (sdFiles, they travel with it and are updated with it), not examples: a row
 // only turns red when the card finds the folder without them (the install did not copy them).
-export const MACROS_DIR = '0:/sys/workshop/macros';
+export const MACROS_DIR = '0:/sys/workshop/macros/axis';
 export const MACROS = ['axis-limits.g', 'axis-measure.g', 'axis-microstep.g', 'axis-move.g', 'axis-probe.g', 'axis-test.g', 'axis-touch.g', 'crash-cal.g', 'step-ceiling.g'];
 
 // c = { reporte: bool,            the service published motorReport (it does only while this page is open)

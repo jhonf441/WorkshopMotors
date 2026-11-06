@@ -275,7 +275,7 @@ async function run() {
 				const row = axisRows.value.find(e => e.letter === L)
 				// second, slower pass, near where it starts to measure
 				const w = Math.round(Math.min(v, row.threshold * 1.25) * 10) / 10
-				const reply = await send(`M98 P"0:/sys/workshop/macros/crash-cal.g" A"${L}" V${v} W${w < v ? w : 0} C${cfg.value.correctionXY} H${stepsSince.value} S${SENS_START} B${SENS_END} L120`)
+				const reply = await send(`M98 P"0:/sys/workshop/macros/axis/crash-cal.g" A"${L}" V${v} W${w < v ? w : 0} C${cfg.value.correctionXY} H${stepsSince.value} S${SENS_START} B${SENS_END} L120`)
 				if (/error|abort/i.test(reply || '')) throw new Error(reply)
 				let res = null
 				for (let i = 0; i < 15 && res == null; i++) {
