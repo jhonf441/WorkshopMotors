@@ -93,8 +93,10 @@ function severityOf(faults, enable, hasData) {
 }
 
 // One state per motor: [{ key, kind, homed, drivers, enable, faults, severity, speedMmS, maxMmS, pct, moving,
-// configuredMa, nowMa, nowPct, runPct, idlePct }]
-export function motorStates(report, om) {
+// configuredMa, nowMa, nowPct, runPct, idlePct, unused }]
+// `mode` is the machine mode now (state.machineMode). An extruder in Laser or CNC mode that is idle, has no fault and holds no current is
+// marked `unused`: it stays listed (it is a real motor, it can still be released) but the page shows it as not used in that mode.
+export function motorStates(report, om, mode) {
 	const powerOff = report ? !!report.without_power_supply : !!(om && om.state && om.state.status === 'off');
 	const released = new Set(report && Array.isArray(report.released) ? report.released.map(String) : []);
 	const homed = {};
@@ -114,6 +116,7 @@ export function motorStates(report, om) {
 		const nowMa = powerOff || !currents.length ? null : Math.max(...currents);
 		const speedMmS = report && !powerOff ? (mmMinToS(e.current_speed_mm_min) || 0) : null;
 		const maxMmS = mmMinToS(e.max_speed_mm_min);
+		const unused = kind === 'extruder' && (mode === 'Laser' || mode === 'CNC') && !faults.length && !speedMmS && enable !== 'enabled';
 		return {
 			key,
 			kind,
@@ -130,7 +133,8 @@ export function motorStates(report, om) {
 			nowMa,
 			nowPct: percent(nowMa, e.current_ma),
 			runPct: typeof e.percent_current === 'number' ? e.percent_current : null,
-			idlePct: typeof e.percent_stst_current === 'number' ? e.percent_stst_current : null
+			idlePct: typeof e.percent_stst_current === 'number' ? e.percent_stst_current : null,
+			unused
 		};
 	});
 }

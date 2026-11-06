@@ -5,7 +5,7 @@
 		</div>
 		<div v-if="!motors.length" class="text-body-2 motors-faint">{{ report ? t('no_motors') : t('waiting_report') }}</div>
 		<div class="motor-grid" :class="{ 'motor-dim': fresh.state !== 'live' }">
-			<div v-for="m in motors" :key="m.key" class="motor-card" :class="'sev-' + m.severity">
+			<div v-for="m in motors" :key="m.key" class="motor-card" :class="['sev-' + m.severity, { 'motor-unused': m.unused }]">
 				<div class="d-flex align-center flex-wrap" style="gap:6px">
 					<span class="motor-letter">{{ m.key }}</span>
 					<span class="text-caption motors-faint">{{ name(m) }}</span>
@@ -15,6 +15,7 @@
 					</v-chip>
 				</div>
 				<div class="d-flex flex-wrap mt-2" style="gap:4px">
+					<v-chip v-if="m.unused" x-small outlined color="grey">{{ t('unused_in_mode', { mode }) }}</v-chip>
 					<v-chip v-if="m.homed !== null" x-small outlined :color="m.homed ? 'success' : 'warning'">{{ m.homed ? t('homed_yes') : t('homed_no') }}</v-chip>
 					<v-chip v-for="f in m.faults" :key="f.key" x-small dark :color="f.severity" :title="faultHint(f.key)">
 						<v-icon x-small left>{{ f.severity === 'error' ? 'mdi-alert-octagon' : 'mdi-alert' }}</v-icon>{{ faultLabel(f.key) }}
@@ -25,6 +26,8 @@
 				<template v-if="m.speedMmS !== null">
 					<div class="motor-line mt-2" :title="t('speed_hint')">
 						{{ m.moving ? t('speed_now', { v: smart(m.speedMmS), pct: num(m.pct) }) : t('still') }}<span class="motors-faint"> · {{ t('speed_max', { max: smart(m.maxMmS) }) }}</span>
+						<!-- MT-2: RRF does not publish the speed of each axis: the number is the cruise speed of the move, and says so here, not only in a tooltip -->
+						<v-chip v-if="m.moving" x-small outlined class="ml-1" :title="t('speed_hint')">{{ t('speed_estimated') }}</v-chip>
 					</div>
 					<v-progress-linear :value="Math.min(100, m.pct || 0)" height="4" rounded :color="(m.pct || 0) >= 95 ? 'warning' : 'primary'" background-color="grey" background-opacity="0.25" />
 				</template>
@@ -59,7 +62,8 @@ export default {
 	props: {
 		motors: { type: Array, required: true },
 		report: { type: Object, default: null },
-		fresh: { type: Object, required: true }
+		fresh: { type: Object, required: true },
+		mode: { type: String, default: '' }
 	},
 	computed: {
 		moving() {
@@ -117,6 +121,9 @@ export default {
 }
 .motor-dim {
 	opacity: 0.6;
+}
+.motor-unused {
+	opacity: 0.65;
 }
 .motor-card {
 	background: rgba(128, 128, 128, 0.08);

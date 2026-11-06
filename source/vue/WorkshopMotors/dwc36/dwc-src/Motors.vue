@@ -21,7 +21,7 @@
 					<side-tabs v-model="section" :items="sections" />
 					<!-- one section at a time, mounted only while it is open (DESIGN.md 3) -->
 					<div class="st-body">
-						<state-section v-if="section === 'state'" :motors="motors" :report="report" :fresh="fresh" @release="goSection('release')" />
+						<state-section v-if="section === 'state'" :motors="motors" :report="report" :fresh="fresh" :mode="modeMachine" @release="goSection('release')" />
 						<details-section v-else-if="section === 'details'" :report="report" :ceiling="ceiling" @charts="openCharts" />
 						<charts-section v-else-if="section === 'charts'" :report="report" :om="model" :ceiling="ceiling" :preselect="chartsPreselect" />
 						<advisor-section v-else-if="section === 'advisor'" :report="report" :axes="axesOM" :mode-current="modeMachine" :vin="vin" :tests="tests" :ceiling="ceiling" />
@@ -127,7 +127,7 @@ export default {
 			return freshness({ hasReport: !!this.report, lastChangeMs: this.lastChangeAt, openedMs: this.openedAt, nowMs: this.now });
 		},
 		motors() {
-			return motorStates(this.report, this.model);
+			return motorStates(this.report, this.model, this.modeMachine);
 		},
 		// what the page header counts: the header chips in red or orange (the service problem and the session are added by it)
 		headerReasons() {
