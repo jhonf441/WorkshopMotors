@@ -906,7 +906,7 @@
 		"stale_note": "Los datos no se actualizan: lo que ves puede no ser lo de ahora.",
 		"move_line": "Movimiento actual: pedida {req} mm/s, de crucero {top} mm/s",
 		"move_limited": "frenado por los límites (M203 / M201 / M566)",
-		"to_release": "Soltar o habilitar",
+		"go_release": "Ir a Soltar / habilitar",
 		"banner_title": "Motores sin fuerza: {list}",
 		"banner_text": "Se mueven a mano y perdieron la posición; un eje vertical puede caer. Para terminar: habilitarlos y hacer homing.",
 		"banner_enable_all": "Habilitar todos",

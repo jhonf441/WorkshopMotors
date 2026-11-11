@@ -906,7 +906,7 @@
 		"stale_note": "The data are not updating: what you see may not be current.",
 		"move_line": "Current move: requested {req} mm/s, cruise {top} mm/s",
 		"move_limited": "held back by the limits (M203 / M201 / M566)",
-		"to_release": "Release or enable",
+		"go_release": "Go to Release / enable",
 		"banner_title": "Motors without holding force: {list}",
 		"banner_text": "They move by hand and lost their position; a vertical axis can fall. To end it: enable them and home.",
 		"banner_enable_all": "Enable all",

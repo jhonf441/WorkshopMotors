@@ -101,7 +101,8 @@ import i18n from '../../i18n'
 'use strict'
 
 import { settings } from './settings.js' // shared settings files with revision (vue/_shared)
-import { MODE_FILES, limitsOfFile, activeLimits, limitRow, bestTests, fileForLines, advice, copyText, formFromMotorFile, motorFileFromForm } from './advisor.js'
+import { sdPath } from './machine-modes.js'
+import { MODE_FILES, modeFileRel, limitsOfFile, activeLimits, limitRow, bestTests, fileForLines, advice, copyText, formFromMotorFile, motorFileFromForm } from './advisor.js'
 import HelpTip from './HelpTip.vue' // vue/_shared36
 import HelpGuide from './HelpGuide.vue' // vue/_shared36
 
@@ -231,7 +232,7 @@ export default {
 			const found = {};
 			for (const m of Object.keys(MODE_FILES)) {
 				try {
-					found[m] = limitsOfFile(await readFile('0:/sys/' + MODE_FILES[m]));
+					found[m] = limitsOfFile(await readFile(sdPath(modeFileRel(m))));
 				} catch (e) {
 					// a machine without that mode file: only the limits in use
 				}

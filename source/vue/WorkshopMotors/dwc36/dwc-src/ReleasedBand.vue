@@ -15,7 +15,8 @@
 			>
 				<v-icon small left>{{ armedNow ? 'mdi-alert' : 'mdi-engine' }}</v-icon>{{ armedNow ? t('banner_tap_again', { list }) : t('banner_enable_all') }}
 			</v-btn>
-			<v-btn small text dark :disabled="!atLeast('operator')" @click="$emit('open')">{{ t('section_release') }}</v-btn>
+			<!-- plain navigation to the section (never locked here: the section carries its own lock and reason) -->
+			<v-btn small text dark @click="$emit('open')">{{ t('section_release') }}<v-icon small right>mdi-arrow-right</v-icon></v-btn>
 		</div>
 	</v-alert>
 	<!-- the role / session reason is OUTSIDE the red box: red is the safety state of the motors, never a refusal -->

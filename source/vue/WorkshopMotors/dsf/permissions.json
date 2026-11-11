@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "plugin": "WorkshopMotors",
+  "namespace": "motors",
+  "prefixes": [
+    "motors"
+  ],
+  "ui": "ui:motors:open",
+  "operations": [
+    "activity.log",
+    "config.commit",
+    "config.lock",
+    "config.unlock",
+    "motors.disable",
+    "motors.enable",
+    "view.heartbeat"
+  ],
+  "shared": [
+    "activity.log",
+    "config.commit",
+    "config.lock",
+    "config.unlock",
+    "view.heartbeat"
+  ],
+  "restricted": [],
+  "targets": [],
+  "profiles": {
+    "readonly": {
+      "title": "MotorsReadOnly",
+      "capabilities": []
+    },
+    "operator": {
+      "title": "MotorsOperator",
+      "capabilities": []
+    },
+    "admin": {
+      "title": "MotorsAdmin",
+      "capabilities": [
+        "config.edit",
+        "machine.motors"
+      ]
+    }
+  }
+}

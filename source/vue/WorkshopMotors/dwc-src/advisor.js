@@ -2,12 +2,14 @@ import { i18n } from './dwc-host.js'
 'use strict'
 
 // The Advisor of Motors without Vue (Advisor.vue draws it): the limits the machine uses NOW (object model) and the ones
-// each mode file sets (sys/mode*.g, only when the machine has them), what they mean for each axis (distance to reach the
+// each mode file sets (sys/workshop/modes/mode*.g, only when the machine has them), what they mean for each axis (distance to reach the
 // speed, pulse rate, voltage the motor asks for), the best results of the step tests, the advice, and copying a
 // suggested line.
 //   node --test test/advisor.test.js   (from vue/WorkshopMotors)
 
-export const MODE_FILES = { Laser: 'modelaser.g', CNC: 'modecnc.g', FFF: 'modefff.g' };
+import { MODES_DIR, sdPath } from './machine-modes.js'
+export const MODE_FILES = { Laser: 'modelaser.g', CNC: 'modecnc.g', FFF: 'modefff.g' };   // names; the folder is MODES_DIR of machine-modes.js
+export const modeFileRel = mode => MODES_DIR + '/' + MODE_FILES[mode];
 const FULL_STEPS = 200;
 const CONFIG_FILE = 'sys/config.g';
 
@@ -156,7 +158,7 @@ export function motorFileFromForm(form) {
 
 // Where a suggested speed / acceleration line goes: the file of the current mode when the machine has it, else config.g
 export function fileForLines(mode, modesFound) {
-	return MODE_FILES[mode] && modesFound && modesFound[mode] ? 'sys/' + MODE_FILES[mode] : CONFIG_FILE;
+	return MODE_FILES[mode] && modesFound && modesFound[mode] ? modeFileRel(mode) : CONFIG_FILE;
 }
 
 const t = (key, params) => i18n.t('plugins.WorkshopMotors.advisor.' + key, params);

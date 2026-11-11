@@ -111,7 +111,8 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { i18n } from './dwc-host.js'
 import { settings } from './settings.js' // shared settings files with revision (vue/_shared)
-import { MODE_FILES, limitsOfFile, activeLimits, limitRow, bestTests, fileForLines, advice, copyText, formFromMotorFile, motorFileFromForm } from './advisor.js'
+import { sdPath } from './machine-modes.js'
+import { MODE_FILES, modeFileRel, limitsOfFile, activeLimits, limitRow, bestTests, fileForLines, advice, copyText, formFromMotorFile, motorFileFromForm } from './advisor.js'
 
 const MOTOR_FILE = '0:/sys/workshop/config/motors.json'
 // readable driver id: DWC's store gives {board, driver} objects
@@ -229,7 +230,7 @@ async function load() {
 	const found = {}
 	for (const m of Object.keys(MODE_FILES)) {
 		try {
-			found[m] = limitsOfFile(await readFile('0:/sys/' + MODE_FILES[m]))
+			found[m] = limitsOfFile(await readFile(sdPath(modeFileRel(m))))
 		} catch (e) {
 			// a machine without that mode file: only the limits in use
 		}
