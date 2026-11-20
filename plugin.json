@@ -2,7 +2,7 @@
   "id": "WorkshopMotors",
   "name": "Motors",
   "author": "jhonf441",
-  "version": "2.6.30",
+  "version": "2.7.11",
   "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/jhonf441/WorkshopMotors",
   "tags": [
@@ -31,9 +31,9 @@
     "permissions.json"
   ],
   "dwcFiles": [
-    "css/WorkshopMotors.4fe80447.css",
-    "css/WorkshopMotors.4fe80447.css.gz",
-    "js/WorkshopMotors.ab0c4cf9.js",
-    "js/WorkshopMotors.ab0c4cf9.js.gz"
+    "css/WorkshopMotors.ca1d1001.css",
+    "css/WorkshopMotors.ca1d1001.css.gz",
+    "js/WorkshopMotors.fa7c748f.js",
+    "js/WorkshopMotors.fa7c748f.js.gz"
   ]
 }

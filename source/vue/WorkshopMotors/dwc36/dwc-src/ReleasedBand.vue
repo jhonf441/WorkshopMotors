@@ -20,7 +20,7 @@
 		</div>
 	</v-alert>
 	<!-- the role / session reason is OUTSIDE the red box: red is the safety state of the motors, never a refusal -->
-	<lock-reason :op="enableOp" need="operator" />
+	<lock-reason :ops="enableOps" min="operator" :subject="$t('plugins.WorkshopMotors.subjects.enable_motors')" />
 	</div>
 </template>
 
@@ -32,7 +32,8 @@
 // (level 2: a motor that gets current jumps to its nearest full step).
 
 import { apiTextKeepRefusals } from './motors-api.js'
-import { roleMixin } from './role-mixin.js' // what the role may do (vue/_shared)
+import { accessCanMixin } from './reason-mixin.js' // what the role and the service say (vue/_shared36)
+import { ENABLE_OPS } from './access-groups.js'
 import { machineFree } from './machine-free.js'
 import { ts } from './shared-t.js'
 import { serviceText, serviceDefaultKey } from './service-text.js'
@@ -42,7 +43,7 @@ import LockReason from './LockReason.vue' // vue/_shared36
 
 export default {
 	components: { LockReason },
-	mixins: [roleMixin],
+	mixins: [accessCanMixin],
 	sessionData: ['armed', 'result'],
 	props: {
 		keys: { type: Array, required: true },
@@ -51,7 +52,7 @@ export default {
 		liveJob: { type: [Object, Boolean], default: null }
 	},
 	data() {
-		return { armed: null, busy: false, result: '', now: Date.now() };
+		return { armed: null, busy: false, result: '', now: Date.now(), enableOps: ENABLE_OPS };
 	},
 	computed: {
 		list() {
@@ -64,7 +65,7 @@ export default {
 		lock() {
 			return block(this.om, this.liveJob, { report: this.report, reserved: this.reserved });
 		},
-		// the operation of the service that enabling calls (the reason next to the button is <lock-reason> of it)
+		// the operation of the service that enabling calls (the sentence next to the button is the lock reason of the group)
 		enableOp() {
 			return request('enable').op;
 		},

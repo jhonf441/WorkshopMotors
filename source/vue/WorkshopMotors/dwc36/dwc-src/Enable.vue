@@ -12,7 +12,7 @@
 		</v-alert>
 
 		<!-- ONE reason for the buttons of the page that the person cannot press (no session / role): enabling is an operator's, releasing a technician's -->
-		<lock-reason :min="lockNeed" class="mb-3" />
+		<lock-reason :ops="holdOps" :min="lockNeed" class="mb-3" :subject="$t('plugins.WorkshopMotors.subjects.hold_motors')" />
 		<div v-if="lock.blocked" class="wf-note is-warn mb-3" role="note"><v-icon :size="16" class="wf-note-icon" aria-hidden="true">mdi-alert-outline</v-icon><span>{{ lock.reason }}</span></div>
 		<div v-if="textIdle" class="wf-note is-info mb-2" role="note"><v-icon :size="16" class="wf-note-icon" aria-hidden="true">mdi-information-outline</v-icon><span>{{ textIdle }}</span></div>
 
@@ -138,14 +138,15 @@ import { serviceText, serviceDefaultKey } from './service-text.js'
 import { motorsOf, block, command, notices, textIdle, noticesLevel4, tap, canUse } from './enable.js'
 import { ENABLE_COLOR, ENABLE_ICON } from './motor-state.js'
 import { sendMotors, ANSWER_MS } from './motors-send.js'
-import { roleMixin } from './role-mixin.js' // what the role may do (vue/_shared)
+import { accessCanMixin } from './reason-mixin.js' // what the role and the service say (vue/_shared36)
+import { HOLD_OPS, ENABLE_OPS, RELEASE_OPS, groupAllowed } from './access-groups.js'
 import HelpTip from './HelpTip.vue' // vue/_shared36
 import LockReason from './LockReason.vue' // vue/_shared36
 import OutcomeNote from './OutcomeNote.vue'
 
 export default {
 	components: { HelpTip, LockReason, OutcomeNote },
-	mixins: [roleMixin],
+	mixins: [accessCanMixin],
 	// the person who left leaves no selection, armed tap, ticked box or result behind (ESTANDAR 3)
 	sessionData: ['sel', 'armed', 'result', 'understood', 'waiting'],
 	props: {
@@ -155,6 +156,7 @@ export default {
 	},
 	data() {
 		return {
+			holdOps: HOLD_OPS,
 			sel: [],
 			armed: null, // { id, until, action, keys } of the armed double tap
 			busy: false,
@@ -181,13 +183,13 @@ export default {
 		},
 		// the role the buttons of the page still wait for: enabling is an operator's, releasing a technician's (the reason names it)
 		lockNeed() {
-			return this.atLeast('operator') ? 'technician' : 'operator';
+			return groupAllowed(ENABLE_OPS, op => this.canDo(op)) ? 'technician' : 'operator';
 		},
 		canRelease() {
-			return this.atLeast('technician') && canUse('disable', this.lock, this.understood, this.busy);
+			return groupAllowed(RELEASE_OPS, op => this.canDo(op)) && canUse('disable', this.lock, this.understood, this.busy);
 		},
 		canEnable() {
-			return this.atLeast('operator') && canUse('enable', this.lock, this.understood, this.busy);
+			return groupAllowed(ENABLE_OPS, op => this.canDo(op)) && canUse('enable', this.lock, this.understood, this.busy);
 		},
 		noticesLevel4() {
 			return noticesLevel4();

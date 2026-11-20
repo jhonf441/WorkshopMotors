@@ -20,7 +20,7 @@
 					<side-tabs v-model="section" :items="sections" />
 					<!-- one section at a time, mounted only while it is open (DESIGN.md 3) -->
 					<div class="st-body">
-						<locked-cover v-if="lockedNow" :needed="lockedNow" />
+						<locked-cover v-if="lockedNow" :needed="lockedNow" :items="sections" :value="section" />
 						<state-section v-else-if="section === 'state'" :motors="motors" :report="report" :fresh="fresh" :mode="modeMachine" @release="goSection('release')" />
 						<details-section v-else-if="section === 'details'" :report="report" :ceiling="ceiling" @charts="openCharts" />
 						<charts-section v-else-if="section === 'charts'" :report="report" :om="model" :ceiling="ceiling" :preselect="chartsPreselect" />
@@ -60,7 +60,9 @@ import MeasureSection, { CEILING_FILE } from './Measure.vue'
 import CrashSection from './CrashSection.vue'
 import ReleasedBand from './ReleasedBand.vue'
 import ControlHolderChip from './ControlHolderChip.vue' // who holds the movement (vue/_shared)
-import { roleMixin } from './role-mixin.js' // what the role sees (vue/_shared)
+import { accessCanMixin } from './reason-mixin.js' // what the role and the service say (vue/_shared36)
+import { workshopCan } from './workshop-auth.js'
+import { SCREEN_OPS } from './access-groups.js'
 import { rowsMotors, MACROS_DIR } from './startup-rows.js'
 import { freshness, motorStates, pageSummary } from './motor-state.js'
 import { parseTestsCsv } from './report-view.js'
@@ -68,6 +70,7 @@ import { restoreSection, sideItems, lockedSection, allowedSection, SECTIONS } fr
 import { start as startRecord } from './record.js'
 import { pluginOf } from './workshop-ids.js'
 import { api } from './workshop-api.js'
+import { currentMode } from './current-mode.js' // the one rule of the real mode (vue/_shared36)
 
 const TAB_KEY = 'workshopMotorsTab'; // the section (an id; an old tab number or id is still understood)
 const TESTS_FILE = '0:/sys/workshop/data/axis-test.csv';
@@ -84,7 +87,7 @@ function readSection() {
 }
 
 export default {
-	mixins: [roleMixin],
+	mixins: [accessCanMixin],
 	// what the files of the machine gave to the person who left (the step ceiling, the saved tests, the macros) is read again for the new one (ESTANDAR 3)
 	sessionData: ['ceiling', 'tests', 'chartsPreselect', 'startupMacros'],
 	components: { PageHeader, ControlHolderChip, ServiceNotice, StartupPanel, SideTabs, LockedCover, StateSection, DetailsSection, ChartsSection, AdvisorSection, EnableSection, AxesTest, MeasureSection, CrashSection, ReleasedBand },
@@ -147,11 +150,11 @@ export default {
 			return SECTIONS;
 		},
 		sections() {
-			return sideItems(k => this.$t('plugins.WorkshopMotors.' + k), op => this.canDo(op));
+			return sideItems(k => this.$t('plugins.WorkshopMotors.' + k), op => this.roleCan(op));
 		},
 		// the role that opens the open section, or '' when this role may
 		lockedNow() {
-			return lockedSection(this.section, op => this.canDo(op));
+			return lockedSection(this.section, op => this.roleCan(op));
 		},
 		// start-up card: drivers in the report of the service and the macros of the plugin
 		rowsStartup() {
@@ -168,7 +171,7 @@ export default {
 			return (this.model.move && this.model.move.axes) ? this.model.move.axes.filter(a => a && a.visible !== false) : [];
 		},
 		modeMachine() {
-			return (this.model.state && this.model.state.machineMode) || '';
+			return currentMode(this.model);
 		},
 		stateMachine() {
 			return (this.model.state && this.model.state.status) || '';
@@ -197,7 +200,7 @@ export default {
 		// the role changed (logged in, out): a section the new role does not see is left for the first one it sees
 		sections(list) {
 			if (!list.some(x => x.id === this.section)) {
-				this.section = allowedSection(this.section, op => this.canDo(op));
+				this.section = allowedSection(this.section, op => this.roleCan(op));
 			}
 		},
 		section(v) {
@@ -216,6 +219,10 @@ export default {
 				this.lastChangeAt = Date.now();
 			}
 		}
+	},
+	created() {
+		// ONE call to auth.can for every group of the page (the sections ask the same cache)
+		this.wantCan(SCREEN_OPS);
 	},
 	mounted() {
 		this.loadCeiling();
@@ -236,6 +243,11 @@ export default {
 		clearTimeout(this._startupWait);
 	},
 	methods: {
+		// what the TABLE of the role says (the sections are opened by role; the groups of buttons follow the service)
+		roleCan(op) {
+			void this.identityTick;
+			return workshopCan(op);
+		},
 		// the person signed in or out, or the role changed: the files the sections read may open now (or no longer)
 		onSessionChange() {
 			this.loadCeiling();

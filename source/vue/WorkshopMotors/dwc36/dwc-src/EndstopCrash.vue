@@ -176,7 +176,8 @@
 				</div>
 				<div v-if="proposal.diff.length" class="d-flex flex-wrap align-center mt-2" style="gap:8px">
 					<v-checkbox v-model="checked" dense hide-details class="mt-0" :label="$t('plugins.WorkshopMotors.crashFinal.i_reviewed_the_change')" />
-					<v-btn small color="primary" :disabled="!checked || saving || blocked" :loading="saving" @click="saveConfig()">{{ $t('plugins.WorkshopMotors.crashFinal.save_to_config_g') }}</v-btn>
+					<v-btn small color="primary" :disabled="!checked || saving || blocked || !canSave" :loading="saving" @click="saveConfig()">{{ $t('plugins.WorkshopMotors.crashFinal.save_to_config_g') }}</v-btn>
+					<lock-reason :ops="configOps" min="technician" :subject="$t('plugins.WorkshopMotors.subjects.endstop_save')" />
 				</div>
 				<v-alert v-if="savedMsg" dense outlined type="success" class="mt-2 mb-0">
 					{{ savedMsg }}
@@ -200,6 +201,9 @@ import { workshopProfile } from './machine-profile.js' // what the service disco
 import { withReservation, stoppedFailure, withNote } from './sequence.js'
 import OutcomeNote from './OutcomeNote.vue'
 import HelpGuide from './HelpGuide.vue' // vue/_shared36
+import LockReason from './LockReason.vue' // vue/_shared36
+import { accessCanMixin } from './reason-mixin.js' // what the role and the service say (vue/_shared36)
+import { CONFIG_OPS } from './access-groups.js'
 import {
 	axesOf as axes, valuesInitial, requirements, speedMin, newSweep, resultFree, resultCap, hint, macroStep, MACRO_STEP,
 	readStep, commandsRestore, proposeConfig, diffLines, hintHoming, requestSaved, newTx, readJson, readM569, readM915, letterGcode
@@ -245,7 +249,8 @@ function saveLocal(v) {
 }
 
 export default {
-	components: { OutcomeNote, HelpGuide },
+	mixins: [accessCanMixin],
+	components: { OutcomeNote, HelpGuide, LockReason },
 	props: {
 		om: { type: Object, default: null },
 		report: { type: Object, default: null },
@@ -253,6 +258,7 @@ export default {
 	},
 	data() {
 		return {
+			configOps: CONFIG_OPS,
 			letter: null,
 			v: 30, correction: 40, h: 200, f: 0, length: 40, approach: 10, overshoot: 5, end: 1, kindFinal: 'S3',
 			modes: {},
@@ -322,6 +328,7 @@ export default {
 		blocked() {
 			return block(this.om, this.liveJob).blocked;
 		},
+		canSave() { return CONFIG_OPS.every(op => this.canDo(op)); }, // the service's answer for saving to config.g (the role table until it answers)
 		reasonBlock() {
 			return block(this.om, this.liveJob).reason;
 		},

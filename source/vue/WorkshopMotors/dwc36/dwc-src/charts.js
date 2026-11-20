@@ -30,6 +30,7 @@ import i18n from '../../i18n'
 // Generic: axes, extruders, drivers and boards are discovered from the report and the object model.
 
 import { faultsOfDriver, faultLabel } from './faults.js'
+import { currentMode } from './current-mode.js' // the one rule of the real mode (vue/_shared36)
 
 // ---- Data of a driver in the report ----
 
@@ -626,7 +627,7 @@ export function armReport(op) {
 		firmware: b0.firmwareVersion || '',
 		boards: (om.boards || []).filter(Boolean).map(boardKey),
 		kinematics: (om.move && om.move.kinematics && om.move.kinematics.name) || report.kinematics || '',
-		mode: (om.state && om.state.machineMode) || '',
+		mode: currentMode(om),
 		state: (om.state && om.state.status) || '',
 		idle: om.move && om.move.idle ? om.move.idle : null
 	};

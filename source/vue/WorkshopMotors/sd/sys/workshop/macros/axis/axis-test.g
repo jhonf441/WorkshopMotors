@@ -58,15 +58,15 @@ if !move.axes[var.i].homed
   abort {var.en ? ("Axis test: home " ^ param.A ^ " first") : ("Prueba de ejes: primero haz homing de " ^ param.A)}
 
 ; how the reference of this axis is measured
-var metodo = "ninguno"
+var method = "none"
 if var.i < #sensors.endstops && sensors.endstops[var.i] != null
   if sensors.endstops[var.i].type == "inputPin"
-    set var.metodo = "switch"
+    set var.method = "switch"
   elif param.A == "Z" && sensors.endstops[var.i].type == "zProbeAsEndstop"
-    set var.metodo = "sonda"
-if var.metodo == "ninguno"
+    set var.method = "probe"
+if var.method == "none"
   abort {var.en ? ("Axis test: " ^ param.A ^ " has no endstop or probe to measure with") : ("Prueba de ejes: " ^ param.A ^ " no tiene final de carrera ni sonda para medir")}
-if var.metodo == "sonda"
+if var.method == "probe"
   if !move.axes[0].homed || !move.axes[1].homed
     abort {var.en ? ("Axis test: for Z home X, Y and Z first") : ("Prueba de ejes: para Z primero haz homing de X, Y y Z")}
 
@@ -75,12 +75,12 @@ var acc = max(5, min(param.C, 20000))
 var reps = 5
 if exists(param.N)
   set var.reps = max(1, min(param.N, 50))
-var inicio = move.axes[var.i].min + 15
-var dist = move.axes[var.i].max - 10 - var.inicio
-if var.metodo == "sonda"
+var startPos = move.axes[var.i].min + 15
+var dist = move.axes[var.i].max - 10 - var.startPos
+if var.method == "probe"
   ; Z: above the bed with room for the probe, never below 10 mm
-  set var.inicio = max(10, move.axes[var.i].min + 10)
-  set var.dist = move.axes[var.i].max - 5 - var.inicio
+  set var.startPos = max(10, move.axes[var.i].min + 10)
+  set var.dist = move.axes[var.i].max - 5 - var.startPos
 if exists(param.D)
   set var.dist = min(param.D, var.dist)
 if var.dist < 5
@@ -95,11 +95,11 @@ if var.zUp > 0
   G1 Z{var.zUp} F600 S0
   G90
 
-if var.metodo == "switch"
+if var.method == "switch"
   M98 P"0:/sys/workshop/macros/axis/axis-measure.g" A{param.A}
 else
   M98 P"0:/sys/workshop/macros/axis/axis-probe.g"
-var antes = global.workshopMeasurement
+var before = global.workshopMeasurement
 
 ; test limits (the current ones are saved in case it is cut)
 var vPrev = move.axes[var.i].speed
@@ -110,23 +110,23 @@ set global.workshopTestAcc = var.aPrev
 set global.workshopTestMode = state.machineMode
 set global.workshopTestPending = true
 M98 P"0:/sys/workshop/macros/axis/axis-limits.g" L{param.A} V{max(var.vel, var.vPrev)} C{var.acc}
-M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.inicio} F{min(3000, max(var.vPrev, 300))}
+M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.startPos} F{min(3000, max(var.vPrev, 300))}
 
 while iterations < var.reps
-  M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.inicio + var.dist} F{var.vel}
-  M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.inicio} F{var.vel}
+  M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.startPos + var.dist} F{var.vel}
+  M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.startPos} F{var.vel}
 M400
 
 ; restore the limits
 M98 P"0:/sys/workshop/macros/axis/axis-limits.g" L{param.A} V{var.vPrev} C{var.aPrev}
 set global.workshopTestPending = false
 
-if var.metodo == "switch"
+if var.method == "switch"
   M98 P"0:/sys/workshop/macros/axis/axis-measure.g" A{param.A}
 else
   M98 P"0:/sys/workshop/macros/axis/axis-probe.g"
-var despues = global.workshopMeasurement
-var dif = var.despues - var.antes
+var after = global.workshopMeasurement
+var diff = var.after - var.before
 
 if var.zUp > 0
   G91
@@ -137,11 +137,11 @@ if !fileexists("0:/sys/workshop/data/axis-test.csv")
   echo >"0:/sys/workshop/data/axis-test.csv" "date,mode,axis,speed_mm_min,accel_mm_s2,travel_mm,repetitions,before_mm,after_mm,difference_mm"
 var csv = state.time ^ "," ^ state.machineMode ^ "," ^ param.A
 set var.csv = var.csv ^ "," ^ var.vel ^ "," ^ var.acc ^ "," ^ var.dist
-set var.csv = var.csv ^ "," ^ var.reps ^ "," ^ var.antes
-set var.csv = var.csv ^ "," ^ var.despues ^ "," ^ var.dif
+set var.csv = var.csv ^ "," ^ var.reps ^ "," ^ var.before
+set var.csv = var.csv ^ "," ^ var.after ^ "," ^ var.diff
 echo >>"0:/sys/workshop/data/axis-test.csv" var.csv
-set global.workshopTestLast = param.A ^ "," ^ var.vel ^ "," ^ var.acc ^ "," ^ var.dif
+set global.workshopTestLast = param.A ^ "," ^ var.vel ^ "," ^ var.acc ^ "," ^ var.diff
 if var.en
-  echo "Test " ^ param.A ^ " (" ^ var.metodo ^ ") at " ^ var.vel ^ " mm/min and " ^ var.acc ^ " mm/s2: difference " ^ var.dif ^ " mm"
+  echo "Test " ^ param.A ^ " (" ^ var.method ^ ") at " ^ var.vel ^ " mm/min and " ^ var.acc ^ " mm/s2: difference " ^ var.diff ^ " mm"
 else
-  echo "Prueba " ^ param.A ^ " (" ^ var.metodo ^ ") a " ^ var.vel ^ " mm/min y " ^ var.acc ^ " mm/s2: diferencia " ^ var.dif ^ " mm"
+  echo "Prueba " ^ param.A ^ " (" ^ var.method ^ ") a " ^ var.vel ^ " mm/min y " ^ var.acc ^ " mm/s2: diferencia " ^ var.diff ^ " mm"

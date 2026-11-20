@@ -1,5 +1,53 @@
 # WorkshopMotors -- historial de versiones
 
+## 2.7.11 -- 2026-11-18
+
+- accessRev: the page asks whoami at once when the service says the access changed
+
+## 2.7.10 -- 2026-11-18
+
+- Access changes (users or roles switched off or on, a role changed) reach the page: it asks whoami again while in view
+
+## 2.7.9 -- 2026-11-18
+
+- Axis macros with English names (isHigh, startPos, method, span, crashCalSens...); session notice icons
+
+## 2.7.8 -- 2026-11-17
+
+- Back to the previous look: the family design pieces of the last rounds are removed (steppers, docks, big readings, token fills)
+
+## 2.7.7 -- 2026-11-13
+
+- Phase 6: family design pieces (docks, step numbers, fills and dark palette as shared tokens)
+
+## 2.7.6 -- 2026-11-13
+
+- Access notices name what they lock (JS and Vue), locked covers say which section they cover
+
+## 2.7.5 -- 2026-11-13
+
+- Safe state and accent colors moved to family tokens; off-scale sizes and monospace fonts aligned
+
+## 2.7.4 -- 2026-11-13
+
+- Machine mode rule: the mode shown comes from the machine state first (currentMode)
+
+## 2.7.3 -- 2026-11-12
+
+- Session reconcile, access notices name what they lock, kiosk native number keyboard
+
+## 2.7.2 -- 2026-11-12
+
+- Kiosk PIN: read-only field and number pad only, no full keyboard
+
+## 2.7.1 -- 2026-11-11
+
+- Owner report 2026-11-11: shutdown without session, kiosk PIN pad, hive confirm color, wheel release and Z keys, version in every page bar
+
+## 2.7.0 -- 2026-11-11
+
+- Block with reason: release and enable motors, the band of released motors and save to config.g say why they are blocked (auth.can, one call per screen); no stop control is asked or blocked
+
 ## 2.6.30 -- 2026-11-10
 
 - Recipes relative to the G-code (Printing), session role switch and UI fixes (26), SD layout manifest

@@ -1,4 +1,9 @@
 {
+	"subjects": {
+		"hold_motors": "Holding the motors",
+		"endstop_save": "Saving the endstop change",
+		"enable_motors": "Enabling the motors"
+	},
 	"common": {
 		"act_test": "Running the test",
 		"act_calibrate": "Calibrating",

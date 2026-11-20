@@ -25,16 +25,16 @@ if var.i >= #sensors.endstops || sensors.endstops[var.i] == null
 if sensors.endstops[var.i].type != "inputPin"
   abort "axis-measure: the endstop of " ^ param.A ^ " is not a switch (use axis-probe.g)"
 
-var alto = sensors.endstops[var.i].highEnd
-var arranque = move.axes[var.i].min + 8
-if var.alto
-  set var.arranque = move.axes[var.i].max - 8
+var isHigh = sensors.endstops[var.i].highEnd
+var startPos = move.axes[var.i].min + 8
+if var.isHigh
+  set var.startPos = move.axes[var.i].max - 8
 
 ; approach fast to 8 mm from the endstop
-M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.arranque} F3000
+M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.startPos} F3000
 M400
 ; go slowly towards the switch until it triggers (20 mm at most)
-if var.alto
+if var.isHigh
   M98 P"0:/sys/workshop/macros/axis/axis-touch.g" L{param.A} D20
 else
   M98 P"0:/sys/workshop/macros/axis/axis-touch.g" L{param.A} D-20
@@ -43,5 +43,5 @@ if !sensors.endstops[var.i].triggered
 set global.workshopMeasurement = move.axes[var.i].machinePosition
 
 ; back to the starting point
-M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.arranque} F3000
+M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.startPos} F3000
 M400

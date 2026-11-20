@@ -24,8 +24,8 @@ if !exists(global.crashCal)
   global crashCal = false
 if !exists(global.crashCalHit)
   global crashCalHit = 0
-if !exists(global.choqueCalSens)
-  global choqueCalSens = 0
+if !exists(global.crashCalSens)
+  global crashCalSens = 0
 if !exists(global.crashCalRes)
   global crashCalRes = null
 if !exists(global.crashCalFake)
@@ -73,20 +73,20 @@ if exists(param.S)
 var sEnd = -12
 if exists(param.B)
   set var.sEnd = max(-64, min(param.B, var.s))
-var largo = 120
+var span = 120
 if exists(param.L)
-  set var.largo = max(30, min(param.L, 400))
+  set var.span = max(30, min(param.L, 400))
 
 ; test stretch: around where it is, inside the travel (10 mm margin)
 var p0 = move.axes[var.i].machinePosition
 var lo = move.axes[var.i].min + 10
 var hi = move.axes[var.i].max - 10
-if var.hi - var.lo < var.largo
-  set var.largo = var.hi - var.lo
-if var.largo < 30
+if var.hi - var.lo < var.span
+  set var.span = var.hi - var.lo
+if var.span < 30
   abort {var.en ? ("Crash calibration: axis " ^ param.A ^ " is too short for the test") : ("Calibrar choque: el eje " ^ param.A ^ " es muy corto para la prueba")}
-var a = max(var.lo, min(var.p0 - var.largo / 2, var.hi - var.largo))
-var b = var.a + var.largo
+var a = max(var.lo, min(var.p0 - var.span / 2, var.hi - var.span))
+var b = var.a + var.span
 
 set global.crashCalRes = null
 set global.crashCalFake = null
@@ -108,7 +108,7 @@ set global.crashCal = true
 
 var ok = null
 while var.s >= var.sEnd
-  set global.choqueCalSens = var.s
+  set global.crashCalSens = var.s
   set global.crashCalHit = 0
   set global.crashCalState = (var.en ? "trying " : "probando ") ^ var.s
   if param.A == "X"

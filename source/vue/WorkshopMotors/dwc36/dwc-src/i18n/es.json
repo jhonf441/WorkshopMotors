@@ -1,4 +1,9 @@
 {
+	"subjects": {
+		"hold_motors": "Sostener los motores",
+		"endstop_save": "Guardar el cambio de fin de carrera",
+		"enable_motors": "Habilitar los motores"
+	},
 	"common": {
 		"act_test": "Hacer la prueba",
 		"act_calibrate": "Calibrar",

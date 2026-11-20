@@ -60,8 +60,8 @@ if param.M < 1 || param.M > 256
 var reps = 3
 if exists(param.N)
   set var.reps = max(1, min(param.N, 20))
-var inicio = move.axes[var.i].min + 15
-var dist = move.axes[var.i].max - 10 - var.inicio
+var startPos = move.axes[var.i].min + 15
+var dist = move.axes[var.i].max - 10 - var.startPos
 if exists(param.D)
   set var.dist = min(param.D, var.dist)
 if var.dist < 20
@@ -79,7 +79,7 @@ if var.zUp > 0
   G1 Z{var.zUp} F600 S0
   G90
 
-M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.inicio} F3000
+M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.startPos} F3000
 M400
 
 set global.workshopCeilingAxis = param.A
@@ -92,8 +92,8 @@ set global.workshopCeilingPending = true
 M98 P"0:/sys/workshop/macros/axis/axis-microstep.g" L{param.A} M{param.M} I1
 
 while iterations < var.reps
-  M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.inicio + var.dist} F{var.vel}
-  M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.inicio} F{var.vel}
+  M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.startPos + var.dist} F{var.vel}
+  M98 P"0:/sys/workshop/macros/axis/axis-move.g" L{param.A} P{var.startPos} F{var.vel}
 M400
 
 M98 P"0:/sys/workshop/macros/axis/axis-microstep.g" L{param.A} M{global.workshopCeilingMicro} I{global.workshopCeilingInterp}
