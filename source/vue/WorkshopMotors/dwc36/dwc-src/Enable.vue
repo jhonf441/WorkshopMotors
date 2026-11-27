@@ -1,6 +1,7 @@
 <template>
 	<div>
-		<div class="text-body-2 mb-2">{{ e('disabling_a_motor_cuts_its_current') }}</div>
+		<card-head icon="mdi-engine-off-outline" :title="s('section_release')" />
+		<div class="enabled-lead">{{ e('disabling_a_motor_cuts_its_current') }}</div>
 
 		<!-- Level 4 (DESIGN.md): fixed notices + "Understood"; with it ticked ONE tap releases (the box replaces the double tap) -->
 		<v-alert dense outlined type="error" class="mb-3 enabled-level4">
@@ -16,38 +17,29 @@
 		<div v-if="lock.blocked" class="wf-note is-warn mb-3" role="note"><v-icon :size="16" class="wf-note-icon" aria-hidden="true">mdi-alert-outline</v-icon><span>{{ lock.reason }}</span></div>
 		<div v-if="textIdle" class="wf-note is-info mb-2" role="note"><v-icon :size="16" class="wf-note-icon" aria-hidden="true">mdi-information-outline</v-icon><span>{{ textIdle }}</span></div>
 
-		<div class="enabled-grid">
-			<div v-for="m in motors" :key="m.key" class="enabled-card" :class="'enabled-' + m.state">
-				<div class="d-flex align-center flex-wrap" style="gap:6px">
+		<!-- one row of 48 per motor (FAMILIA-REDISENO 3): the box to choose it, letter + name + its drivers | the data chips of 24 and its two buttons of 32 -->
+		<div class="enabled-list">
+			<div v-for="m in motors" :key="m.key" class="wf-row enabled-row">
+				<div class="enabled-who">
 					<v-checkbox
-						:input-value="sel.indexOf(m.key) >= 0" dense hide-details class="mt-0 pt-0"
+						:input-value="sel.indexOf(m.key) >= 0" dense hide-details class="enabled-check" :aria-label="m.label"
 						:disabled="lock.blocked || busy" @change="choose(m.key, $event)"
 					/>
-					<span class="enabled-name">{{ m.label }}</span>
-					<v-spacer />
-					<v-chip x-small :outlined="m.state !== 'released'" :dark="m.state === 'released'" :color="stateColor(m.state)" :title="s('enable_' + m.state + '_hint')">
-						<v-icon x-small left>{{ stateIcon(m.state) }}</v-icon>{{ s('enable_' + m.state) }}
-					</v-chip>
-				</div>
-				<div class="d-flex flex-wrap mt-1" style="gap:4px">
-					<v-chip v-if="m.kind === 'axis'" x-small outlined :color="m.homed ? 'success' : 'warning'">
-						{{ m.homed ? s('homed_yes') : s('homed_no') }}
-					</v-chip>
-					<v-chip v-if="!m.visible" x-small outlined color="grey">{{ e('hidden_axis') }}</v-chip>
-					<v-chip v-if="pending(m.key)" x-small outlined color="info">
-						<v-progress-circular indeterminate size="10" width="2" class="mr-1" />{{ e('confirming') }}
-					</v-chip>
-				</div>
-				<div class="mt-2">
-					<div v-for="d in m.drivers" :key="d.id" class="enabled-driver">
-						<v-icon x-small :color="driverColor(d.enabled)">{{ driverIcon(d.enabled) }}</v-icon>
-						<span>{{ $t('plugins.WorkshopMotors.details.driver_id', { id: d.id }) }}</span>
-						<span class="enabled-faint">&middot; {{ d.board === 'main' ? e('main_board') : d.board }}</span>
-						<v-spacer />
-						<span class="enabled-faint">{{ textDriver(d) }}</span>
+					<span class="enabled-letter" :class="'enabled-' + m.state" aria-hidden="true">{{ m.key }}</span>
+					<div class="wf-row-txt">
+						<div class="wf-row-name">{{ m.label }}</div>
+						<div class="wf-row-text">
+							<span v-for="(d, i) in m.drivers" :key="d.id"><template v-if="i">; </template>{{ $t('plugins.WorkshopMotors.details.driver_id', { id: d.id }) }} &middot; {{ d.board === 'main' ? e('main_board') : d.board }}: {{ textDriver(d) }}</span>
+						</div>
+						<div class="enabled-chips">
+							<span class="wf-chip wf-state" :class="stateKind(m.state)" :title="s('enable_' + m.state + '_hint')">{{ s('enable_' + m.state) }}</span>
+							<span v-if="m.kind === 'axis'" class="wf-chip wf-state" :class="m.homed ? 'ok' : 'warn'">{{ m.homed ? s('homed_yes') : s('homed_no') }}</span>
+							<span v-if="!m.visible" class="wf-chip">{{ e('hidden_axis') }}</span>
+							<span v-if="pending(m.key)" class="wf-chip"><v-progress-circular indeterminate size="10" width="2" class="mr-1" />{{ e('confirming') }}</span>
+						</div>
 					</div>
 				</div>
-				<div class="d-flex flex-wrap mt-2" style="gap:6px">
+				<div class="wf-row-control">
 					<v-btn small outlined color="error" :disabled="!canRelease || !holding(m)" :title="holding(m) ? undefined : e('already_released')" @click="touch('disable', [m.key], m.key)">
 						<v-icon small left>mdi-engine-off-outline</v-icon>{{ e('release_one') }}
 					</v-btn>
@@ -63,14 +55,14 @@
 		</div>
 		<div v-if="!motors.length" class="text-caption enabled-faint">{{ e('there_are_no_axes_or_extruders') }}</div>
 
-		<!-- the selection and all -->
-		<div class="enabled-bar mt-3">
-			<div class="d-flex align-center flex-wrap" style="gap:6px">
-				<span class="text-subtitle-2 mr-1">{{ e('selected_list', { list: sel.length ? sel.join(', ') : e('none') }) }}</span>
+		<!-- the selection and all: a group of the card with a divider above, no framed box -->
+		<div class="wf-group wf-group-divided enabled-bar">
+			<div class="d-flex align-center flex-wrap" style="gap:8px">
+				<span class="wf-group-title enabled-sel">{{ e('selected_list', { list: sel.length ? sel.join(', ') : e('none') }) }}</span>
 				<v-btn small text :disabled="lock.blocked || busy" @click="sel = motors.map(m => m.key)">{{ e('select_all') }}</v-btn>
 				<v-btn small text :disabled="!sel.length" @click="sel = []">{{ e('none_2') }}</v-btn>
 			</div>
-			<div class="d-flex flex-wrap mt-2" style="gap:6px">
+			<div class="d-flex flex-wrap mt-2" style="gap:8px">
 				<v-btn small outlined color="error" :disabled="!canRelease || !sel.length || !anyHolding(selMotors)" @click="touch('disable', sel.slice(), 'sel')">
 					<v-icon small left>mdi-engine-off-outline</v-icon>{{ e('release_selected') }}
 				</v-btn>
@@ -108,18 +100,13 @@
 		<div v-if="busy" class="text-caption mt-2">{{ e('sending') }}</div>
 		<outcome-note v-if="result" :text="result.text" :type="result.ok ? 'success' : 'error'" class="mt-2" />
 
-		<div class="mt-2 d-flex align-center text-body-2" style="gap:4px">
-			<span>{{ e('what_can_and_cannot_be_done') }}</span>
-			<help-tip :title="e('what_can_and_cannot_be_done')">
-				<div class="text-body-2">
-					<p><b>{{ e('per_axis_or_extruder_not_per') }}</b> {{ e('the_firmware_reprapfirmware_enables_and') }}</p>
-					<p><b>{{ e('commands') }}</b> {{ e('m18_x_one_axis_m18_e0') }}</p>
-					<p><b>{{ e('they_enable_themselves') }}</b> {{ e('any_move_of_that_axis_jog') }}</p>
-					<p><b>{{ e('idle') }}</b> {{ e('motors_at_rest_are_not_disabled') }}</p>
-					<p><b>{{ e('how_the_state_is_known') }}</b> {{ e('the_firmware_does_not_publish_it') }}</p>
-				</div>
-			</help-tip>
-		</div>
+		<help-fold class="mt-2" :title="e('what_can_and_cannot_be_done')" :items="[
+			{ title: e('per_axis_or_extruder_not_per'), what: e('the_firmware_reprapfirmware_enables_and') },
+			{ title: e('commands'), what: e('m18_x_one_axis_m18_e0') },
+			{ title: e('they_enable_themselves'), what: e('any_move_of_that_axis_jog') },
+			{ title: e('idle'), what: e('motors_at_rest_are_not_disabled') },
+			{ title: e('how_the_state_is_known'), what: e('the_firmware_does_not_publish_it') }
+		]" />
 	</div>
 </template>
 
@@ -136,16 +123,17 @@ import { machineFree } from './machine-free.js'
 import { ts } from './shared-t.js'
 import { serviceText, serviceDefaultKey } from './service-text.js'
 import { motorsOf, block, command, notices, textIdle, noticesLevel4, tap, canUse } from './enable.js'
-import { ENABLE_COLOR, ENABLE_ICON } from './motor-state.js'
+import { ENABLE_KIND } from './motor-state.js'
 import { sendMotors, ANSWER_MS } from './motors-send.js'
 import { accessCanMixin } from './reason-mixin.js' // what the role and the service say (vue/_shared36)
 import { HOLD_OPS, ENABLE_OPS, RELEASE_OPS, groupAllowed } from './access-groups.js'
-import HelpTip from './HelpTip.vue' // vue/_shared36
+import HelpFold from './HelpFold.vue' // vue/_shared36
 import LockReason from './LockReason.vue' // vue/_shared36
+import CardHead from './CardHead.vue' // vue/_shared36
 import OutcomeNote from './OutcomeNote.vue'
 
 export default {
-	components: { HelpTip, LockReason, OutcomeNote },
+	components: { HelpFold, LockReason, CardHead, OutcomeNote },
 	mixins: [accessCanMixin],
 	// the person who left leaves no selection, armed tap, ticked box or result behind (ESTANDAR 3)
 	sessionData: ['sel', 'armed', 'result', 'understood', 'waiting'],
@@ -310,19 +298,9 @@ export default {
 		pending(key) {
 			return !!this.waiting && this.waiting.keys.indexOf(key) >= 0;
 		},
-		stateColor(state) {
-			return ENABLE_COLOR[state] || 'grey';
-		},
-		stateIcon(state) {
-			return ENABLE_ICON[state] || 'mdi-help-circle-outline';
-		},
-		driverColor(v) {
-			return v === true ? 'success' : (v === false ? 'grey' : 'grey');
-		},
-		driverIcon(v) {
-			if (v === true) return 'mdi-checkbox-blank-circle';
-			if (v === false) return 'mdi-checkbox-blank-circle-outline';
-			return 'mdi-help-circle-outline';
+		// the dot of the data chip of the state (family .wf-chip.wf-state): a dot + the word, never a filled chip
+		stateKind(state) {
+			return ENABLE_KIND[state] || '';
 		},
 		textDriver(d) {
 			if (this.report && this.report.without_power_supply) return this.e('no_power');
@@ -335,45 +313,62 @@ export default {
 </script>
 
 <style scoped>
-/* min(..., 100%): on a phone a card never asks for more than the width there is */
-.enabled-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
-	gap: 10px;
+/* one line of 13 under the head of the card: what releasing does */
+.enabled-lead {
+	margin: 0 0 12px;
+	font-size: 13px;
+	opacity: 0.85;
 }
-.enabled-card {
-	background: rgba(128, 128, 128, 0.08);
-	border-radius: 8px;
-	padding: 10px 12px;
-	border-left: 4px solid #455a64;
+.enabled-row {
+	align-items: start;
+	padding: 6px 0;
 }
-/* DESIGN.md section 2: the fill of each meaning */
-.enabled-card.enabled-enabled {
-	border-left-color: #2e7d32;
-}
-.enabled-card.enabled-partial {
-	border-left-color: #e65100;
-}
-.enabled-card.enabled-released {
-	border-left-color: #c62828;
-}
-.enabled-name {
-	font-size: 16px;
-	font-weight: 600;
-}
-.enabled-driver {
+.enabled-who {
 	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	min-width: 0;
+}
+.enabled-check {
+	flex: none;
+	margin: 0;
+	padding: 0;
+}
+/* the letter of the motor in a 32 px box whose border says its holding state (a meaning colour, DESIGN.md 2): it replaces the grey
+   card with a coloured side bar of before */
+.enabled-letter {
+	flex: none;
+	display: inline-flex;
 	align-items: center;
-	gap: 6px;
-	font-size: 12px;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border: 2px solid var(--wf-control-line);
+	border-radius: 8px;
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1;
+}
+.enabled-letter.enabled-enabled {
+	border-color: var(--wf-ok);
+}
+.enabled-letter.enabled-partial {
+	border-color: var(--wf-warn);
+}
+.enabled-letter.enabled-released {
+	border-color: var(--wf-err);
+}
+.enabled-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin-top: 4px;
 }
 .enabled-faint {
-	color: var(--tp-faint, #9e9e9e);
+	opacity: 0.75;
 }
-.enabled-bar {
-	padding: 10px 12px;
-	border: 1px solid rgba(128, 128, 128, 0.25);
-	border-radius: 8px;
+.enabled-sel {
+	margin: 0 4px 0 0;
 }
 .enabled-level4 ul {
 	margin: 2px 0 0;

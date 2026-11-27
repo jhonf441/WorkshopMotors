@@ -185,6 +185,26 @@ export function pageSummary(motors, report, fresh) {
 	return { chips, released, powerOff };
 }
 
+// The word of how fresh the data are, for the head of a card (FAMILIA-REDISENO 3: state and age at the right of the title):
+// { key (plugins.WorkshopMotors.page.<key>), params, kind: the dot of the family .wf-state ('ok' | 'warn' | '' = neutral) }
+export function freshWord(fresh) {
+	const s = fresh && fresh.state;
+	if (s === 'live') {
+		return { key: 'live', params: {}, kind: 'ok' };
+	}
+	if (s === 'stale') {
+		return fresh.ageS == null ? { key: 'chip_stale_unknown', params: {}, kind: 'warn' } : { key: 'chip_stale', params: { age: age(fresh.ageS) }, kind: 'warn' };
+	}
+	if (s === 'none') {
+		return { key: 'chip_no_data', params: {}, kind: 'warn' };
+	}
+	return { key: 'chip_waiting', params: {}, kind: '' };
+}
+
+// The dot of a data chip (family .wf-chip.wf-state) for each holding state and each severity: a dot + the word, never a filled chip
+export const ENABLE_KIND = { enabled: 'ok', released: 'err', partial: 'warn', off: '', unknown: '', unpowered: '' };
+export const SEVERITY_KIND = { error: 'err', warning: 'warn' };
+
 // Colors of the meaning (DESIGN.md section 2) of a motor state and of a card
 export const ENABLE_COLOR = { enabled: 'success', released: 'error', partial: 'warning', off: 'grey', unknown: 'grey', unpowered: 'grey' };
 export const ENABLE_ICON = {

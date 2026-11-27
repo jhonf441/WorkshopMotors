@@ -10,7 +10,7 @@
 
 Page `/Plugins/Motors`. Shows how the motors are doing (state, current, speed, pulses, RPM, driver status), draws live charts, lets you release or enable motors, and has start-up tools: advisor (speed and acceleration limits per mode), axis test, measure the pulse ceiling of your board and StallGuard crash detection for the free (no-limits) jog.
 
-Version documented: 2.6.x on DWC 3.6.3, machine powered off ("Power supply off": no motor power), so all values are at rest.
+Version documented: 2.10.x on DWC 3.6, machine at rest (motors holding, nothing moving), so all values are at rest.
 
 SAFETY NOTE of the plugin: it never writes driver registers (`M569.2` with a value can damage a TMC chip). The only `M569.2` is a read of the raw status register. Everything else comes from the object model and `M122`.
 
@@ -23,33 +23,33 @@ SAFETY NOTE of the plugin: it never writes driver registers (`M569.2` with a val
 1. Install WorkshopService.
 2. DWC > Settings > Plugins > Install `WorkshopMotors-<ver>.zip`; Start if needed.
 3. Reload DWC. Open *Plugins > Motors*.
-4. Verify: header shows "All fine", "Power supply off" or "Live", and the motor cards appear.
+4. Verify: the header shows "All fine" (or a warning) and the section title shows "Live"; the axis rows appear.
 
 ## 3. Functions
 
-The page is "Motors" (side menu: Plugins > Motors). Its side bar has two groups: "Health" (State, Details, Charts, Release / enable) and "Commissioning" (Advisor, Test, Measure, Crash). Names show when the bar is open, icons only when collapsed with the double arrow. Red rectangles mark the control described.
+The page is "Motors" (side menu: Plugins > Motors). Its side bar has two groups: "Health" (State, Details, Charts, Release / enable) and "Commissioning" (Advisor, Test, Measure, Crash). Names show when the bar is open, icons only when collapsed with the double arrow (the pin keeps it open). Red rectangles mark the control described.
 
 ### Page header
 
 #### State chips
-- What: "All fine" (or a warning), "Motors without faults" and "Live" (the data is being read now).
-- Where: top right of the page header (any picture).
+- What: "All fine" (or a warning) and "Motors without faults" in the page header, next to the plugin version; "Live" at the right of the section title (the data is being read now).
+- Where: top right of the page header and of each section (any picture).
 - How: read only.
 
 ### Health
 
 ![State](https://raw.githubusercontent.com/jhonf441/WorkshopMotors/main/img/01-state-axis-cards.png)
 
-Picture 1: one card per axis.
+Picture 1: one row per axis and extruder.
 
 #### State of each axis
-- What: one card per axis and extruder (here X, Y, Z): a chip "Holding" (or "No power" when the motor supply is off), "Homed", "No faults", the speed against its maximum, the current in mA (here 1856 mA, 69 % of M906) and its percentage at rest (71 %), the drivers (Z has 0.5 and 0.4) and the board.
+- What: one row per axis and extruder (here X, Y, Z and E0): the chips "Holding" (or "No power" when the motor supply is off, "Not energized" for a motor that is off), "Homed" and "No faults", the speed against its maximum, the current in mA (here 1856 mA, 69 % of M906) and its percentage at rest (71 %), the drivers (Z has 0.3, 0.4 and the CAN driver 40.0) and the board.
 - Where: State (picture 1).
 - How: read only.
 
 #### Link "Release or enable"
-- What: jumps to the Release / enable entry.
-- Where: under the cards (red rectangle, picture 1).
+- What: "Go to Release / enable" jumps to that entry.
+- Where: under the rows (red rectangle, picture 1).
 - How: press it.
 
 ![Details](https://raw.githubusercontent.com/jhonf441/WorkshopMotors/main/img/02-details-pulses.png)
@@ -57,12 +57,12 @@ Picture 1: one card per axis.
 Picture 2: "Board and pulse generation" and the first axis.
 
 #### Board and pulse generation
-- What: "Late step pulses (M122 hiccups)" (0 means the board generates every step on time), the steps per second the board generates now (kHz) against the reference of the board, the requested / cruise speed and the kinematics (Cartesian: each motor is independent).
+- What: "Late step pulses (M122 hiccups)" (0 means the board generates every step on time), the steps per second the board generates now (kHz) against the reference for one motor of the board, the requested / cruise speed and the kinematics (Cartesian: each motor is independent).
 - Where: Details, top row of tiles (red rectangle, picture 2).
 - How: read only.
 
 #### Per axis: speed, pulses, RPM, current and driver
-- What: for each axis: the speed against its maximum, pulses per motor against the board ceiling (here 12 kHz), motor RPM (calculated with the full steps per turn of each motor: 200 unless you say otherwise, see "Steps per revolution" below), configured current (100 % when moving, 71 % at rest) and the driver line with its alerts and firmware status. RRF does not publish the instantaneous speed per axis: the plugin uses the top speed of the current move (exact for single-axis moves, conservative for diagonals).
+- What: for each axis: the speed against its maximum, pulses per motor against the board ceiling (here 12 kHz), motor RPM (calculated with the full steps per turn of each motor: 200 unless you say otherwise, see "Steps per revolution" below), configured current (100 % when moving, 71 % at rest) and a table of the drivers of the axis with their state, current and alerts. RRF does not publish the instantaneous speed per axis: the plugin uses the top speed of the current move (exact for single-axis moves, conservative for diagonals).
 - Where: Details, one block per axis (picture 2).
 - How: read only.
 
@@ -73,21 +73,21 @@ Picture 2: "Board and pulse generation" and the first axis.
 
 ![Charts](https://raw.githubusercontent.com/jhonf441/WorkshopMotors/main/img/03-charts.png)
 
-Picture 3: "Charts": chooser, quick buttons and period (red rectangles).
+Picture 3: "Charts": period and layout, chooser and quick buttons (red rectangles).
 
 #### Charts to show
 - What: a dropdown to pick the charts (here Speed of X, Y and Z); each chart shows max / min / avg and a "Scale: linear" chip; the cross closes one.
-- Where: top of Charts (red rectangle, picture 3).
+- Where: under the period row (red rectangle, picture 3).
 - How: open the dropdown and tick the charts; press the cross to remove one.
 
 #### Quick buttons
-- What: "Speed of all", "Current of all", "StallGuard of all", "Board (pulses, voltage, temperature)", "All" and "Remove all".
+- What: "Speed of all", "Current of all", "StallGuard of all", "Pulses of all", "Board (pulses, voltage, temperature)", "All" and "Remove all".
 - Where: row under the dropdown (red rectangle, picture 3).
 - How: press one.
 
 #### Period and layout
 - What: the period of the charts (1 min, 5 min, 15 min, 30 min, 1 h) and one or two columns.
-- Where: right of the quick buttons (red rectangle, picture 3).
+- Where: row at the top of Charts (red rectangle, picture 3).
 - How: press a period or a layout icon.
 - Watch out: pinch gestures are captured by the chart (the page does not zoom while touching it).
 
@@ -99,17 +99,17 @@ Picture 3: "Charts": chooser, quick buttons and period (red rectangles).
 
 ![Release](https://raw.githubusercontent.com/jhonf441/WorkshopMotors/main/img/04-release-enable.png)
 
-Picture 4: "Release / enable": the warning, the tick "Understood", and the buttons per axis (red rectangles on the tick and on the lower buttons: not pressed).
+Picture 4: "Release / enable": the warning, the tick "Understood", the buttons per axis and the buttons for the selection (red rectangles: not pressed).
 
 #### Release or enable one axis
 - What: "Release" cuts the current of that motor (no force, it can be moved by hand); "Enable" turns it on again. Each axis has a checkbox and its own two buttons.
-- Where: Release / enable, one card per axis (picture 4).
+- Where: Release / enable, one row per axis (picture 4).
 - How: 1. Tick "Understood: I will release the motors carefully". 2. Press "Release" or "Enable" on the axis.
 - Watch out: released motors have NO force: the head or gantry move by hand and the position (homing) is lost; a vertical axis (Z) can fall under its own weight, hold or support it first; while released do not use the jog: any movement enables them again by itself. To stop it press Enable and home. In case of danger use the Emergency Stop.
 
 #### Release or enable selected / all
 - What: tick several axes and press "Release selected" or "Enable selected"; "Select all" and "None" change the selection; "Release all" and "Enable all" act on every axis.
-- Where: bottom of Release / enable (red rectangle, picture 4).
+- Where: bottom of Release / enable (red rectangle on the selection buttons, picture 4).
 - How: 1. Tick the "Understood" box. 2. Choose the axes. 3. Press the button.
 - Watch out: same risks as above; not pressed.
 
@@ -127,7 +127,7 @@ Picture 4: "Release / enable": the warning, the tick "Understood", and the butto
 
 ![Advisor](https://raw.githubusercontent.com/jhonf441/WorkshopMotors/main/img/05-advisor-messages.png)
 
-Picture 5: "Advisor": one message per axis.
+Picture 5: "Advisor": one message per axis and the first rows of the limits table.
 
 #### Advisor: current and pulse margin
 - What: compares the nominal current with what the motor is set to (recommended 50-85 % of the rated current) - it asks for the rated current when there is no motor data -, tells if the board has margin in pulses (here 14 % of the reference for X and Y) and says "no tests in this mode" for axes with no test.
@@ -136,7 +136,7 @@ Picture 5: "Advisor": one message per axis.
 
 #### Speed and acceleration limits per mode
 - What: a table with speed, acceleration, jerk, time to reach speed and pulses at maximum speed per mode (Now = what the machine uses, Laser, CNC, 3D printing).
-- Where: Advisor, "Speed and acceleration limits" (scroll down; heading at the bottom of picture 5).
+- Where: Advisor, "Speed and acceleration limits" (below the messages, bottom of picture 5).
 - How: read only.
 
 ![Test](https://raw.githubusercontent.com/jhonf441/WorkshopMotors/main/img/06-axis-test-form.png)

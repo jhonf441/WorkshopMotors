@@ -1,5 +1,42 @@
 # WorkshopMotors -- historial de versiones
 
+## 2.10.0 -- 2026-11-23
+
+- Redesign on the family scale (FAMILIA-REDISENO tanda 4): compact page bar (the family no longer draws the lead line); every redesigned section card opens with the family head (icon in the section colour, title, how fresh the data are).
+- State: one row of 48 per motor instead of a grey card per motor; the letter in a box whose border says the worst state, the figures in one line, data chips of 24 with a dot and the word (holding, homing, faults), the fault hint written under the row; "Go to Release / enable" is a text button of 32 under the list.
+- Details: the tiles become the family figures (grid of 160), one group per axis with ONE table of its drivers (rows of 40) instead of a card per driver, the fault hints under the table; the table of every driver is a family table with its own search (words in any order, accents ignored).
+- Release / enable: one row of 48 per motor (box to choose it, letter, drivers, chips, Release and Enable of 32); the selection is a group with a divider, not a framed box.
+- Charts: period and layout as segments of 32, quick buttons of 32, alerts and the advanced report in family tables, one help fold at the foot.
+- Advisor, Test, Measure, Crash: x-small buttons, icons and chips go to the scale (32 / 16 / 24).
+
+## 2.9.2 -- 2026-11-23
+
+- optional files are never requested when absent
+
+## 2.9.1 -- 2026-11-22
+
+- select arrows, one focus ring per field, shared family stylesheet split
+
+## 2.9.0 -- 2026-11-22
+
+- Collapsible help and scale label outside the chart
+
+## 2.8.3 -- 2026-11-22
+
+- Rebuild with shared update: start-up card split into modules, neutral Spanish texts, service texts resynced, unused .wf-index rule dropped
+
+## 2.8.2 -- 2026-11-22
+
+- Tuteo in texts (no voseo in es.json).
+
+## 2.8.1 -- 2026-11-22
+
+- Visual review round: single hover and focus for inputs and controls (family styles), 44 px switch and checkbox rows, range picker field 44 px.
+
+## 2.8.0 -- 2026-11-21
+
+- Style unification: Measure (ceiling, delete, energize) and axes test use the family write state and button, a busy machine is refused through the family result line, help popovers become help lines and folds, 44 px controls, nothing under 12 px, one 4000 ms double touch.
+
 ## 2.7.11 -- 2026-11-18
 
 - accessRev: the page asks whoami at once when the service says the access changed
@@ -42,7 +79,7 @@
 
 ## 2.7.1 -- 2026-11-11
 
-- Owner report 2026-11-11: shutdown without session, kiosk PIN pad, hive confirm color, wheel release and Z keys, version in every page bar
+- User report 2026-11-11: shutdown without session, kiosk PIN pad, hive confirm color, wheel release and Z keys, version in every page bar
 
 ## 2.7.0 -- 2026-11-11
 

@@ -2,11 +2,9 @@
 	<div class="mt-4">
 		<div class="text-subtitle-2 d-flex align-center flex-wrap" style="gap:6px">
 			<v-icon small>mdi-table-large</v-icon>{{ $t('plugins.WorkshopMotors.references.references_to_compare') }}
-			<v-chip x-small label outlined color="grey">{{ $t('plugins.WorkshopMotors.references.copy_included_in_the_plugin') }}</v-chip>
-			<help-tip :title="$t('plugins.WorkshopMotors.references.references_to_compare')">
-				{{ $t('plugins.WorkshopMotors.references.table_note') }}{{ timing ? ' (M569 T' + timing + ')' : '' }}.
-			</help-tip>
+			<v-chip small label outlined color="grey">{{ $t('plugins.WorkshopMotors.references.copy_included_in_the_plugin') }}</v-chip>
 		</div>
+		<help-line class="mb-2">{{ $t('plugins.WorkshopMotors.references.table_note') }}{{ timing ? ' (M569 T' + timing + ')' : '' }}.</help-line>
 		<div class="ref-scroll">
 			<v-simple-table dense class="ref-table">
 				<thead>
@@ -57,14 +55,14 @@ import REF from './references.json'
 import { readTable, caseText, sourceText, shareRow, timingOf } from './references.js'
 import { exportReferences } from './export-files.js'
 import { ts } from './shared-t.js'
-import HelpTip from './HelpTip.vue' // vue/_shared36
+import HelpLine from './HelpLine.vue' // vue/_shared36
 
 const REPO = 'WorkshopMotors';
 const pt = (key, params) => i18n.t('plugins.WorkshopMotors.' + key, params);
 const rt = (key, params) => pt('references.' + key, params);
 
 export default {
-	components: { HelpTip },
+	components: { HelpLine },
 	props: {
 		ceiling: { type: Object, default: null },
 		report: { type: Object, default: null }

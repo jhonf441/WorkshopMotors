@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<help-guide :title="$t('plugins.WorkshopMotors.common.how_it_works')" :what="$t('plugins.WorkshopMotors.advisor.intro')" class="mb-3" />
+		<card-head icon="mdi-lightbulb-on-outline" :title="$t('plugins.WorkshopMotors.motors.advisor')" />
 
 		<!-- Advice -->
 		<div class="tips">
@@ -12,8 +12,8 @@
 					<div v-if="c.line" class="line-cfg mt-1">
 						<code>{{ c.line }}</code>
 						<span class="text-caption grey--text ml-2">{{ $t('plugins.WorkshopMotors.advisor.in') }} <code>{{ c.file }}</code></span>
-						<v-btn x-small icon :title="$t('plugins.WorkshopMotors.advisor.copy_line')" :aria-label="$t('plugins.WorkshopMotors.advisor.copy_line')" @click="copy(c.line)">
-							<v-icon x-small :color="copied === c.line ? 'success' : undefined">{{ copied === c.line ? 'mdi-check' : 'mdi-content-copy' }}</v-icon>
+						<v-btn small icon :title="$t('plugins.WorkshopMotors.advisor.copy_line')" :aria-label="$t('plugins.WorkshopMotors.advisor.copy_line')" @click="copy(c.line)">
+							<v-icon small :color="copied === c.line ? 'success' : undefined">{{ copied === c.line ? 'mdi-check' : 'mdi-content-copy' }}</v-icon>
 						</v-btn>
 						<span v-if="copyFailed === c.line" class="text-caption warning--text">{{ $t('plugins.WorkshopMotors.advisor.copy_failed') }}</span>
 					</div>
@@ -57,12 +57,10 @@
 			</table>
 		</div>
 		<div v-if="loading" class="text-caption grey--text mt-1">{{ $t('plugins.WorkshopMotors.advisor.reading_sys_mode_g') }}</div>
-		<help-guide :title="$t('plugins.WorkshopMotors.common.how_it_works')" :how="$t('plugins.WorkshopMotors.advisor.table_note')" class="mt-1" />
 
 		<!-- Motor data -->
-		<div class="text-subtitle-2 mt-4 mb-1">{{ $t('plugins.WorkshopMotors.advisor.your_motors_data') }}<help-tip :title="$t('plugins.WorkshopMotors.advisor.your_motors_data')">
-			{{ $t('plugins.WorkshopMotors.advisor.motor_data_note', { v: vin.toFixed(0) }) }}
-		</help-tip></div>
+		<div class="text-subtitle-2 mt-4 mb-1">{{ $t('plugins.WorkshopMotors.advisor.your_motors_data') }}</div>
+		<help-line class="mb-2" :text="$t('plugins.WorkshopMotors.advisor.motor_data_note', { v: vin.toFixed(0) })" />
 		<div style="overflow-x:auto">
 			<table class="table-motor">
 				<thead>
@@ -71,20 +69,21 @@
 				<tbody>
 					<tr v-for="f in rowsMotor" :key="f.key" :class="{ 'sub-row': f.level === 2 }">
 						<td class="purpose">
+							<span class="mf-label">{{ $t('plugins.WorkshopMotors.advisor.for') }}</span>
 							<b>{{ f.title }}</b>
 							<div class="grey--text text-caption">{{ f.sub }}</div>
 						</td>
 						<template v-if="f.own">
-							<td><v-text-field v-model="motorForm[f.key].model" dense outlined hide-details :placeholder="$t('plugins.WorkshopMotors.advisor.optional')" /></td>
-							<td><v-text-field v-model="motorForm[f.key].current_a" type="number" step="0.1" dense outlined hide-details /></td>
-							<td><v-text-field v-model="motorForm[f.key].inductance_mh" type="number" step="0.1" dense outlined hide-details /></td>
-							<td><v-text-field v-model="motorForm[f.key].torque_ncm" type="number" step="1" dense outlined hide-details /></td>
-							<td><v-text-field v-model="motorForm[f.key].steps_per_rev" type="number" :title="$t('plugins.WorkshopMotors.advisor.steps_per_rev_tip')" step="200" min="24" max="1000" placeholder="200" dense outlined hide-details /></td>
-							<td><v-btn v-if="f.key !== 'general'" x-small text @click="removeOwn(f.key)">{{ $t('plugins.WorkshopMotors.advisor.use_inherited', { what: f.inherits }) }}</v-btn></td>
+							<td><label class="mf-label" :id="fid(f.key, 'model') + '-l'" :for="fid(f.key, 'model')">{{ $t('plugins.WorkshopMotors.advisor.model') }}</label><span class="mf-box"><v-text-field :id="fid(f.key, 'model')" :aria-labelledby="fid(f.key, 'model') + '-l'" v-model="motorForm[f.key].model" dense outlined hide-details :placeholder="$t('plugins.WorkshopMotors.advisor.optional')" /></span></td>
+							<td><label class="mf-label" :id="fid(f.key, 'rated_current_a') + '-l'" :for="fid(f.key, 'rated_current_a')">{{ $t('plugins.WorkshopMotors.advisor.rated_current_a') }}</label><span class="mf-box"><v-text-field :id="fid(f.key, 'rated_current_a')" :aria-labelledby="fid(f.key, 'rated_current_a') + '-l'" v-model="motorForm[f.key].current_a" type="number" step="0.1" dense outlined hide-details /></span></td>
+							<td><label class="mf-label" :id="fid(f.key, 'inductance_mh') + '-l'" :for="fid(f.key, 'inductance_mh')">{{ $t('plugins.WorkshopMotors.advisor.inductance_mh') }}</label><span class="mf-box"><v-text-field :id="fid(f.key, 'inductance_mh')" :aria-labelledby="fid(f.key, 'inductance_mh') + '-l'" v-model="motorForm[f.key].inductance_mh" type="number" step="0.1" dense outlined hide-details /></span></td>
+							<td><label class="mf-label" :id="fid(f.key, 'torque_n_cm') + '-l'" :for="fid(f.key, 'torque_n_cm')">{{ $t('plugins.WorkshopMotors.advisor.torque_n_cm') }}</label><span class="mf-box"><v-text-field :id="fid(f.key, 'torque_n_cm')" :aria-labelledby="fid(f.key, 'torque_n_cm') + '-l'" v-model="motorForm[f.key].torque_ncm" type="number" step="1" dense outlined hide-details /></span></td>
+							<td><label class="mf-label" :id="fid(f.key, 'steps_per_rev') + '-l'" :for="fid(f.key, 'steps_per_rev')">{{ $t('plugins.WorkshopMotors.advisor.steps_per_rev') }}</label><span class="mf-box"><v-text-field :id="fid(f.key, 'steps_per_rev')" :aria-labelledby="fid(f.key, 'steps_per_rev') + '-l'" v-model="motorForm[f.key].steps_per_rev" type="number" :title="$t('plugins.WorkshopMotors.advisor.steps_per_rev_tip')" step="200" min="24" max="1000" placeholder="200" dense outlined hide-details /></span></td>
+							<td><v-btn v-if="f.key !== 'general'" small text @click="removeOwn(f.key)">{{ $t('plugins.WorkshopMotors.advisor.use_inherited', { what: f.inherits }) }}</v-btn></td>
 						</template>
 						<template v-else>
 							<td colspan="5" class="grey--text">{{ $t('plugins.WorkshopMotors.advisor.uses_inherited', { what: f.inherits }) }}{{ f.summary ? ': ' + f.summary : '' }}</td>
-							<td><v-btn x-small text color="primary" @click="doOwn(f.key)">{{ $t('plugins.WorkshopMotors.advisor.own_data') }}</v-btn></td>
+							<td><v-btn small text color="primary" @click="doOwn(f.key)">{{ $t('plugins.WorkshopMotors.advisor.own_data') }}</v-btn></td>
 						</template>
 					</tr>
 				</tbody>
@@ -92,6 +91,8 @@
 		</div>
 		<v-btn small color="primary" class="mt-2" :loading="savingMotor" @click="saveMotor()">{{ $t('plugins.WorkshopMotors.common.save') }}</v-btn>
 		<div v-if="motorMsg" class="text-caption mt-1" :class="motorMsgError ? 'error--text' : 'success--text'">{{ motorMsg }}</div>
+		<!-- one help for the whole section, at the foot -->
+		<help-fold class="mt-3" :items="[{ title: $t('plugins.WorkshopMotors.motors.advisor'), what: $t('plugins.WorkshopMotors.advisor.intro') }, { title: $t('plugins.WorkshopMotors.advisor.limits'), how: $t('plugins.WorkshopMotors.advisor.table_note') }]" />
 	</div>
 </template>
 
@@ -103,8 +104,9 @@ import i18n from '../../i18n'
 import { settings } from './settings.js' // shared settings files with revision (vue/_shared)
 import { sdPath } from './machine-modes.js'
 import { MODE_FILES, modeFileRel, limitsOfFile, activeLimits, limitRow, bestTests, fileForLines, advice, copyText, formFromMotorFile, motorFileFromForm } from './advisor.js'
-import HelpTip from './HelpTip.vue' // vue/_shared36
-import HelpGuide from './HelpGuide.vue' // vue/_shared36
+import HelpLine from './HelpLine.vue' // vue/_shared36
+import HelpFold from './HelpFold.vue' // vue/_shared36
+import CardHead from './CardHead.vue' // vue/_shared36
 
 const MOTOR_FILE = '0:/sys/workshop/config/motors.json';
 // readable driver id: DWC's store gives {board, driver} objects
@@ -120,7 +122,7 @@ async function readFile(path) {
 }
 
 export default {
-	components: { HelpTip, HelpGuide },
+	components: { HelpLine, HelpFold, CardHead },
 	props: {
 		report: { type: Object, default: null },
 		axes: { type: Array, default: () => [] },
@@ -224,6 +226,10 @@ export default {
 		clearTimeout(this.copiedTimer);
 	},
 	methods: {
+		// id of a motor-data field: the visible label points at it (for) and it points back (aria-labelledby)
+		fid(key, field) {
+			return 'adv-' + String(key).replace(/[^A-Za-z0-9_-]/g, '-') + '-' + field;
+		},
 		nameMode(m) {
 			return { Laser: i18n.t('plugins.WorkshopMotors.advisor.laser'), CNC: 'CNC', FFF: i18n.t('plugins.WorkshopMotors.common.3d_printing') }[m] || m;
 		},
@@ -336,6 +342,56 @@ export default {
 }
 .table-motor tr.sub-row td.purpose {
 	padding-left: 22px;
+}
+.table-motor .mf-label {
+	display: none;
+}
+.table-motor .mf-box {
+	display: block;
+}
+/* phone: one card per motor, one field per row with its own label (no sideways scroll, the first column is never cut) */
+@media (max-width: 600px) {
+	.table-motor,
+	.table-motor tbody,
+	.table-motor tr {
+		display: block;
+		width: 100%;
+	}
+	.table-motor thead {
+		display: none;
+	}
+	.table-motor tr {
+		padding: 8px 0 12px;
+		border-bottom: 1px solid rgba(128, 128, 128, 0.3);
+	}
+	.table-motor td {
+		display: grid;
+		grid-template-columns: minmax(96px, 36%) minmax(0, 1fr);
+		align-items: center;
+		gap: 8px;
+		min-width: 0;
+		padding: 4px 0;
+		border: 0;
+	}
+	.table-motor td.purpose {
+		display: block;
+		white-space: normal;
+		padding-left: 0;
+	}
+	.table-motor tr.sub-row td.purpose {
+		padding-left: 12px;
+	}
+	.table-motor td[colspan] {
+		display: block;
+	}
+	.table-motor .mf-label {
+		display: block;
+		font-size: 12px;
+		font-weight: 600;
+	}
+	.table-motor td.purpose .mf-label {
+		display: none;
+	}
 }
 .tip {
 	display: flex;

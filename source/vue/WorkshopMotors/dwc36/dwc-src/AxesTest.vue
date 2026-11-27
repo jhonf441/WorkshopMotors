@@ -13,7 +13,7 @@
 		<!-- Requirements -->
 		<div class="d-flex flex-wrap mt-3" style="gap:6px">
 			<v-chip v-for="r in requirements" :key="r.text" small :color="r.ok ? 'success' : 'error'" outlined>
-				<v-icon x-small left>{{ r.ok ? 'mdi-check' : 'mdi-close' }}</v-icon>{{ r.text }}
+				<v-icon small left>{{ r.ok ? 'mdi-check' : 'mdi-close' }}</v-icon>{{ r.text }}
 			</v-chip>
 		</div>
 		<div v-if="axesWithoutMethod.length" class="text-caption grey--text mt-2">
@@ -21,7 +21,7 @@
 		</div>
 		<v-alert v-if="pending" dense type="warning" class="mt-3 mb-0" outlined>
 			{{ $t('plugins.WorkshopMotors.axesTest.previous_test_interrupted', { axis: pending.axis }) }}
-			<v-btn x-small color="warning" class="ml-2 black--text" :loading="restoring" @click="restore()">{{ $t('plugins.WorkshopMotors.axesTest.restore_limits') }}</v-btn>
+			<v-btn small color="warning" class="ml-2 black--text" :loading="restoring" @click="restore()">{{ $t('plugins.WorkshopMotors.axesTest.restore_limits') }}</v-btn>
 		</v-alert>
 
 		<!-- Form -->
@@ -29,7 +29,7 @@
 			<v-col cols="12" sm="4">
 				<v-btn-toggle v-model="axis" mandatory dense color="primary">
 					<v-btn v-for="e in axesInfo" :key="e.letter" small :value="e.letter" :disabled="!e.method" :title="e.reason">
-						{{ e.letter }}<v-icon v-if="e.method === 'probe'" x-small right>mdi-arrow-collapse-down</v-icon>
+						{{ e.letter }}<v-icon v-if="e.method === 'probe'" small right>mdi-arrow-collapse-down</v-icon>
 					</v-btn>
 				</v-btn-toggle>
 			</v-col>
@@ -68,13 +68,8 @@
 		</div>
 
 		<div class="d-flex flex-wrap align-center mt-3" style="gap:8px">
-			<v-btn small
-				:color="armed ? 'amber darken-3' : 'primary'" :dark="armed" :disabled="!canBegin || running"
-				@click="touchBegin()"
-			>
-				<v-icon left>{{ armed ? 'mdi-alert' : 'mdi-play' }}</v-icon>
-				{{ armed ? $t('plugins.WorkshopMotors.common.tap_again_the_machine_will_move') : $t('plugins.WorkshopMotors.axesTest.start_test') }}
-			</v-btn>
+			<!-- the machine MOVES: a write of the family (workshop-action.js), a double touch of 4000 ms; the sequence itself is run() (it tells its own progress and outcome) -->
+			<wf-action-button :action="beginAction" main :label="$t('plugins.WorkshopMotors.axesTest.start_test')" :arm-label="$t('plugins.WorkshopMotors.common.tap_again_the_machine_will_move')" :disabled="!canBegin || running" @run="beginAction.run({})" />
 			<v-btn small v-if="running" outlined color="warning" @click="stopRequest = true" :disabled="stopRequest">
 				{{ stopRequest ? $t('plugins.WorkshopMotors.axesTest.stops_when_this_step_finishes') : $t('plugins.WorkshopMotors.axesTest.stop_after_this_step') }}
 			</v-btn>
@@ -92,7 +87,7 @@
 		<div class="d-flex align-center mt-4 mb-1">
 			<div class="text-subtitle-2">{{ $t('plugins.WorkshopMotors.axesTest.saved_results') }}</div>
 			<v-spacer />
-			<v-btn x-small text @click="$emit('reload')"><v-icon x-small left>mdi-refresh</v-icon>{{ $t('plugins.WorkshopMotors.axesTest.refresh') }}</v-btn>
+			<v-btn small text @click="$emit('reload')"><v-icon small left>mdi-refresh</v-icon>{{ $t('plugins.WorkshopMotors.axesTest.refresh') }}</v-btn>
 		</div>
 		<div v-if="!tests.length" class="text-caption grey--text">{{ $t('plugins.WorkshopMotors.axesTest.no_tests_yet_they_re_saved') }}</div>
 		<div v-else style="overflow-x:auto">
@@ -109,7 +104,7 @@
 						<td>{{ p.accel }} mm/s&sup2;</td>
 						<td>{{ p.dist }} mm &times;{{ p.reps }}</td>
 						<td :class="p.ok ? 'success--text' : 'error--text'">{{ p.dif >= 0 ? '+' : '' }}{{ p.dif.toFixed(3) }} mm</td>
-						<td><v-chip x-small :color="p.ok ? 'success' : 'error'" text-color="white">{{ p.ok ? $t('plugins.WorkshopMotors.axesTest.ok') : $t('plugins.WorkshopMotors.axesTest.lost_steps') }}</v-chip></td>
+						<td><v-chip small :color="p.ok ? 'success' : 'error'" text-color="white">{{ p.ok ? $t('plugins.WorkshopMotors.axesTest.ok') : $t('plugins.WorkshopMotors.axesTest.lost_steps') }}</v-chip></td>
 					</tr>
 				</tbody>
 			</table>
@@ -126,6 +121,8 @@ import { mapActions } from 'vuex'
 import { reserveMotion } from './workshop-api.js'
 import { sequenceBlock, withReservation, stoppedFailure } from './sequence.js'
 import OutcomeNote from './OutcomeNote.vue'
+import WfActionButton from './WfActionButton.vue' // vue/_shared36 (FASE2)
+import { createAction } from './workshop-action.js' // vue/_shared36 (FASE2)
 
 export const THRESHOLD_MM = 0.1;
 // Step-loss threshold per axis: with a switch (G1 H4) ~0.1 mm; Z is measured
@@ -136,7 +133,7 @@ export function thresholdAxis(axis) {
 }
 
 export default {
-	components: { OutcomeNote },
+	components: { OutcomeNote, WfActionButton },
 	props: {
 		axes: { type: Array, default: () => [] },
 		state: { type: String, default: '' },
@@ -158,8 +155,6 @@ export default {
 			accel: 1000,
 			dist: 300,
 			reps: 5,
-			armed: false,
-			armedTimer: null,
 			running: false,
 			stepCurrent: 0,
 			stopRequest: false,
@@ -293,15 +288,18 @@ export default {
 	},
 		watch: {
 			axis() {
-				this.disarm();
+				this.beginAction.cancel();
 				this.valuesPerDefault();
 			},
 		kind() {
-			this.disarm();
+			this.beginAction.cancel(); // an armed test does not follow the person to another axis or kind
 		}
 	},
+	created() {
+		this.beginAction = createAction({ arm: 'double', run: async () => { await this.run(); return {}; } });
+	},
 	beforeDestroy() {
-		clearTimeout(this.armedTimer);
+		this.beginAction.dispose();
 	},
 		mounted() {
 			// if the chosen axis cannot be tested (or does not exist), the first one that can (the axis watcher then
@@ -332,20 +330,6 @@ export default {
 				this.aStep = Math.max(5, Math.round(a * 0.5));
 				this.dist = this.methodAxis === 'probe' ? 50 : 300;
 			},
-		disarm() {
-			this.armed = false;
-			clearTimeout(this.armedTimer);
-		},
-		touchBegin() {
-			if (!this.armed) {
-				this.armed = true;
-				clearTimeout(this.armedTimer);
-				this.armedTimer = setTimeout(() => { this.armed = false; }, 4000);
-				return;
-			}
-			this.disarm();
-			this.run();
-		},
 		async run() {
 			this.running = true;
 			this.stopRequest = false;
@@ -440,6 +424,8 @@ export default {
 /* the three test kinds do not fit a phone in one row: they scroll instead of overflowing the page */
 .toggle-scroll {
 	overflow-x: auto;
+	padding-top: 8px;
+	padding-bottom: 8px;
 }
 .explica {
 	background: rgba(25, 118, 210, 0.08);

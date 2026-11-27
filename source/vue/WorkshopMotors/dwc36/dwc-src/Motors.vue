@@ -1,17 +1,16 @@
 <template>
 	<v-container :style="secStyle" fluid class="pa-0 motors-page workshop-theme">
-		<service-notice />
-		<!-- header (DESIGN.md 3): the common page header; the chips say at a glance what matters -->
+		<!-- header (DESIGN.md 3): the common page bar, compact by default in the family (FAMILIA-REDISENO 3: the lead line is not drawn, a screen
+		     reader still reads it); the chips say at a glance what matters. How fresh the data are is said in the head of each card. -->
 		<page-header :lead="$t('plugins.WorkshopMotors.page.lead')" icon="mdi-engine" :title="$t('plugins.WorkshopMotors.common.motors')" :reasons="headerReasons" :loading="waitingData">
 			<v-chip v-for="c in summary.chips" :key="c.id" small outlined :color="c.color">
-				<v-icon x-small left>{{ c.icon }}</v-icon>{{ $t('plugins.WorkshopMotors.page.' + c.key, c.params) }}
+				<v-icon small left>{{ c.icon }}</v-icon>{{ $t('plugins.WorkshopMotors.page.' + c.key, c.params) }}
 			</v-chip>
 			<control-holder-chip :model="model" />
-			<template v-slot:right>
-				<span v-if="fresh.state === 'live'" class="text-caption motors-faint">{{ $t('plugins.WorkshopMotors.page.live') }}</span>
-			</template>
 			<template v-slot:startup><startup-panel plugin="WorkshopMotors" :defs="rowsStartup" /></template>
 		</page-header>
+		<!-- the notice goes under the page bar (bar first, band below) -->
+		<service-notice />
 		<!-- level 4 (DESIGN.md 5): motors without holding force, visible in every section while it lasts -->
 		<released-band v-if="summary.released.length" :keys="summary.released" :report="report" :om="model" :live-job="liveJob" @open="goSection('release')" />
 		<div class="mb-3">
@@ -22,7 +21,7 @@
 					<div class="st-body">
 						<locked-cover v-if="lockedNow" :needed="lockedNow" :items="sections" :value="section" />
 						<state-section v-else-if="section === 'state'" :motors="motors" :report="report" :fresh="fresh" :mode="modeMachine" @release="goSection('release')" />
-						<details-section v-else-if="section === 'details'" :report="report" :ceiling="ceiling" @charts="openCharts" />
+						<motor-details v-else-if="section === 'details'" :report="report" :ceiling="ceiling" :fresh="fresh" @charts="openCharts" />
 						<charts-section v-else-if="section === 'charts'" :report="report" :om="model" :ceiling="ceiling" :preselect="chartsPreselect" />
 						<advisor-section v-else-if="section === 'advisor'" :report="report" :axes="axesOM" :mode-current="modeMachine" :vin="vin" :tests="tests" :ceiling="ceiling" />
 						<enable-section v-else-if="section === 'release'" :report="report" :om="model" :live-job="liveJob" />
@@ -90,7 +89,7 @@ export default {
 	mixins: [accessCanMixin],
 	// what the files of the machine gave to the person who left (the step ceiling, the saved tests, the macros) is read again for the new one (ESTANDAR 3)
 	sessionData: ['ceiling', 'tests', 'chartsPreselect', 'startupMacros'],
-	components: { PageHeader, ControlHolderChip, ServiceNotice, StartupPanel, SideTabs, LockedCover, StateSection, DetailsSection, ChartsSection, AdvisorSection, EnableSection, AxesTest, MeasureSection, CrashSection, ReleasedBand },
+	components: { PageHeader, ControlHolderChip, ServiceNotice, StartupPanel, SideTabs, LockedCover, StateSection, MotorDetails: DetailsSection, ChartsSection, AdvisorSection, EnableSection, AxesTest, MeasureSection, CrashSection, ReleasedBand },
 	data() {
 		return {
 			section: readSection(),
@@ -307,5 +306,55 @@ export default {
 <style>
 .motors-page .motors-faint {
 	color: var(--tp-faint, #9e9e9e);
+}
+/* touch area of 40 (the family .wf-hit rule): Vuetify hides the ::after of a toggle button, so it is given back here */
+.motors-page .v-btn-toggle > .v-btn.v-btn::after {
+	display: block;
+}
+.motors-page .v-btn-toggle {
+	margin: 4px 0;
+}
+/* a switch or checkbox: its invisible input grows to the 40 px area (the click lands on it) */
+.motors-page .v-input--selection-controls__input input {
+	top: -8px;
+	left: -8px;
+	width: calc(100% + 16px);
+	height: calc(100% + 16px);
+}
+/* the tab bar clips its children: room for the 40 px area of a tab of 32 */
+.motors-page .v-tabs .v-slide-group__wrapper {
+	padding: 4px 0;
+	margin: -4px 0;
+}
+/* a checkbox row: the label fills the row and carries the 40 px area (a click on it ticks the box) */
+.motors-page .v-input--selection-controls .v-input__slot > .v-label {
+	position: relative;
+	flex: 1 1 auto;
+	align-self: stretch;
+	display: flex;
+	align-items: center;
+}
+.motors-page .v-input--selection-controls .v-input__slot > .v-label::after {
+	content: '';
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 50%;
+	height: var(--wf-hit, 40px);
+	transform: translateY(-50%);
+}
+/* the help link of the service notice: 40 px area */
+.motors-page .service-notice a {
+	position: relative;
+	display: inline-block;
+}
+.motors-page .service-notice a::after {
+	content: '';
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 50%;
+	height: var(--wf-hit, 40px);
+	transform: translateY(-50%);
 }
 </style>

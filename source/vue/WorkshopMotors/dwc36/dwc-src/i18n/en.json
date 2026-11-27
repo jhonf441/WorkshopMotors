@@ -396,6 +396,7 @@
 		"waiting_for_data_from_the_service": "Waiting for data from the service...",
 		"charts_to_show": "Charts to show",
 		"pick_one_or_several_they_use": "Choose one or several. They use what the service already publishes (they ask nothing new of the board): with this page open, speed and pulses every second and the driver values every ~5 s. All show the same period up to now and the line is cut where there was no data. Keeps up to one hour while DWC is open.",
+		"pick_short": "Choose one or several charts; all of them show the same period.",
 		"main_paren": "(main)",
 		"group_motion": "Motion",
 		"extruder_name": "Extruder {name}",
@@ -584,6 +585,7 @@
 		"pulses_it_didn_t_generate_in": "(pulses it didn't generate in time, M122). The first step with hiccups went over the ceiling. At the end the microstepping is restored; home afterwards.",
 		"your_board_s_pulse_ceiling": "YOUR board's pulse ceiling",
 		"ceiling_intro": "dc42's reference is a fixed table (Duet 3 6HC, RRF 3.2). This measures the one of your board and your firmware: it raises the microstepping of the axis to 1/{micro} (the board has to generate many more pulses per mm) and moves the axis at normal speeds, each time with more pulses per second. After each step it checks whether the firmware counted",
+		"ceiling_short": "Measures how many pulses per second your board can take with your firmware.",
 		"previous_measurement_interrupted": "A previous measurement was interrupted: axis {axis} may have been left with the test microstepping.",
 		"khz_per_motor_n_steps": "kHz per motor. {n} possible step(s) with this axis",
 		"steps_over_max_speed": "(from {khz} kHz it would have to go faster than its maximum speed: they are not tested)",
@@ -923,6 +925,7 @@
 	},
 	"details": {
 		"driver_id": "Driver {id}",
+		"col_state": "State",
 		"hiccups_title": "Late step pulses (M122 hiccups)",
 		"hiccups_none": "No reading: power supply off or no M122 data yet",
 		"hiccups_total": "{n} since the service started",

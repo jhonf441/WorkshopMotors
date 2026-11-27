@@ -37,16 +37,15 @@
 		</template>
 
 		<!-- Calibrar -->
-		<div class="text-subtitle-2 mt-4 mb-1">{{ $t('plugins.WorkshopMotors.crash.calibrate_the_sensitivity') }}<help-tip :title="$t('plugins.WorkshopMotors.crash.calibrate_the_sensitivity')">
-			{{ $t('plugins.WorkshopMotors.crash.the_axis_goes_back_and_forth') }} <b>{{ $t('plugins.WorkshopMotors.crash.free_space') }}</b> {{ $t('plugins.WorkshopMotors.crash.about_12_cm_around_where_it') }}
-		</help-tip></div>
+		<div class="text-subtitle-2 mt-4 mb-1">{{ $t('plugins.WorkshopMotors.crash.calibrate_the_sensitivity') }}</div>
+		<help-line class="mb-2">{{ $t('plugins.WorkshopMotors.crash.the_axis_goes_back_and_forth') }} <b>{{ $t('plugins.WorkshopMotors.crash.free_space') }}</b> {{ $t('plugins.WorkshopMotors.crash.about_12_cm_around_where_it') }}</help-line>
 		<!-- 2026-10-10 ("add enough warnings when crash is going to be
 configured"): level 4 = leaves the machine without a protection
 while it lasts -> fixed warnings + Understood checkbox + notice
 while it runs + how to cut it. -->
-		<v-alert v-if="pending" dense type="warning" class="mt-3 mb-0">
+		<v-alert v-if="pending" dense text type="warning" class="mt-3 mb-0">
 			{{ $t('plugins.WorkshopMotors.crash.interrupted_1', { axis: pending }) }} <b>{{ $t('plugins.WorkshopMotors.crash.reduced_current') }}</b> {{ $t('plugins.WorkshopMotors.crash.interrupted_2') }}
-			<v-btn x-small color="warning" class="ml-2 black--text" :loading="restoring" @click="restore()">{{ $t('plugins.WorkshopMotors.common.restore_now') }}</v-btn>
+			<v-btn small depressed color="primary" class="ml-2" :loading="restoring" @click="restore()">{{ $t('plugins.WorkshopMotors.common.restore_now') }}</v-btn>
 		</v-alert>
 		<div class="notices mt-3" :class="{ on: running }">
 			<div class="notices-t">
@@ -64,7 +63,7 @@ while it runs + how to cut it. -->
 		</div>
 		<div class="d-flex flex-wrap mt-2" style="gap:6px">
 			<v-chip v-for="r in requirements" :key="r.text" small :color="r.ok ? 'success' : 'error'" outlined>
-				<v-icon x-small left>{{ r.ok ? 'mdi-check' : 'mdi-close' }}</v-icon>{{ r.text }}
+				<v-icon small left>{{ r.ok ? 'mdi-check' : 'mdi-close' }}</v-icon>{{ r.text }}
 			</v-chip>
 		</div>
 		<div class="d-flex flex-wrap align-center mt-3" style="gap:8px">
@@ -116,7 +115,7 @@ import { ts } from './shared-t.js'
 import { serviceText, serviceDefaultKey } from './service-text.js'
 import { ORIGIN, withReservation, stoppedFailure } from './sequence.js'
 import OutcomeNote from './OutcomeNote.vue'
-import HelpTip from './HelpTip.vue' // vue/_shared36
+import HelpLine from './HelpLine.vue' // vue/_shared36
 
 // Calibrating the crash is a sequence that changes the motors' sensitivity: moving is
 // free with a paused job or a still live job, but this is NOT (2026-10-12): it is blocked.
@@ -144,7 +143,7 @@ async function readJson(path, def) {
 }
 
 export default {
-	components: { HelpTip, OutcomeNote },
+	components: { HelpLine, OutcomeNote },
 	props: {
 		axes: { type: Array, default: () => [] },
 		state: { type: String, default: '' }

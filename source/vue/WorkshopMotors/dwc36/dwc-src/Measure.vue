@@ -1,18 +1,19 @@
 <template>
 	<div>
 		<!-- ===================== Step ceiling ===================== -->
-		<div class="text-subtitle-1 mb-1"><v-icon small class="mr-1">mdi-pulse</v-icon>{{ $t('plugins.WorkshopMotors.measure.your_board_s_pulse_ceiling') }}<help-tip :title="$t('plugins.WorkshopMotors.measure.your_board_s_pulse_ceiling')">
-			<v-icon small color="info" class="mr-1">mdi-information</v-icon>
-			{{ $t('plugins.WorkshopMotors.measure.ceiling_intro', { micro: MICRO }) }} <b>hiccups</b> {{ $t('plugins.WorkshopMotors.measure.pulses_it_didn_t_generate_in') }}
-		</help-tip></div>
+		<div class="text-subtitle-1 mb-1"><v-icon small class="mr-1">mdi-pulse</v-icon>{{ $t('plugins.WorkshopMotors.measure.your_board_s_pulse_ceiling') }}</div>
+		<help-line class="mb-2" :text="$t('plugins.WorkshopMotors.measure.ceiling_short')" />
+		<help-fold class="mb-2">
+			<p>{{ $t('plugins.WorkshopMotors.measure.ceiling_intro', { micro: MICRO }) }} <b>hiccups</b> {{ $t('plugins.WorkshopMotors.measure.pulses_it_didn_t_generate_in') }}</p>
+		</help-fold>
 		<div class="d-flex flex-wrap mt-3" style="gap:6px">
 			<v-chip v-for="r in reqCeiling" :key="r.text" small :color="r.ok ? 'success' : 'error'" outlined>
-				<v-icon x-small left>{{ r.ok ? 'mdi-check' : 'mdi-close' }}</v-icon>{{ r.text }}
+				<v-icon small left>{{ r.ok ? 'mdi-check' : 'mdi-close' }}</v-icon>{{ r.text }}
 			</v-chip>
 		</div>
 		<v-alert v-if="globals.workshopCeilingPending" dense type="warning" class="mt-3 mb-0" outlined>
 			{{ $t('plugins.WorkshopMotors.measure.previous_measurement_interrupted', { axis: globals.workshopCeilingAxis }) }}
-			<v-btn x-small color="warning" class="ml-2 black--text" :loading="restoring" @click="restoreCeiling()">{{ $t('plugins.WorkshopMotors.measure.restore') }}</v-btn>
+			<v-btn small color="warning" class="ml-2 black--text" :loading="restoring" @click="restoreCeiling()">{{ $t('plugins.WorkshopMotors.measure.restore') }}</v-btn>
 		</v-alert>
 		<v-row dense class="mt-3">
 			<v-col cols="12" sm="3">
@@ -33,10 +34,8 @@
 			<span v-if="axisOM && motorsAxis > 1">{{ $t('plugins.WorkshopMotors.measure.axis_has_n_motors', { axis: axisT, n: motorsAxis }) }}</span>
 		</div>
 		<div class="d-flex flex-wrap align-center mt-3" style="gap:8px">
-			<v-btn small :color="armedT ? 'amber darken-3' : 'primary'" :dark="armedT" :disabled="!canCeiling || runningT" @click="touchCeiling()">
-				<v-icon left>{{ armedT ? 'mdi-alert' : 'mdi-play' }}</v-icon>
-				{{ armedT ? $t('plugins.WorkshopMotors.common.tap_again_the_machine_will_move') : $t('plugins.WorkshopMotors.measure.measure_the_ceiling') }}
-			</v-btn>
+			<!-- the machine MOVES: a write of the family (workshop-action.js), a double touch of 4000 ms; the sequence itself is measureCeiling (it tells its own progress and outcome) -->
+			<wf-action-button :action="ceilingAction" main :label="$t('plugins.WorkshopMotors.measure.measure_the_ceiling')" :arm-label="$t('plugins.WorkshopMotors.common.tap_again_the_machine_will_move')" :disabled="!canCeiling || runningT" @run="ceilingAction.run({})" />
 			<v-btn small v-if="runningT" outlined color="warning" :disabled="stopT" @click="stopT = true">
 				{{ stopT ? $t('plugins.WorkshopMotors.measure.it_stops_after_this_step') : $t('plugins.WorkshopMotors.measure.stop_after_this_step') }}
 			</v-btn>
@@ -44,6 +43,7 @@
 				<v-progress-circular indeterminate size="16" width="2" class="mr-1" />{{ stateT }}
 			</span>
 		</div>
+		<wf-result v-if="ceilingAction.state === 'error'" :action="ceilingAction" class="mt-3" @retry="ceilingAction.retry()" />
 		<outcome-note :text="msgT || ''" :type="kindT" class="mt-3" />
 		<div v-if="ceiling" class="mt-3 text-body-2">
 			<b>{{ $t('plugins.WorkshopMotors.measure.measured') }}</b> {{ $t('plugins.WorkshopMotors.measure.khz_per_motor_value', { khz: ceiling.khz_per_motor }) }}
@@ -53,9 +53,7 @@
 			</span>
 			{{ $t('plugins.WorkshopMotors.measure.it_s_used_as_the_reference') }}
 			<!-- deletes the measured file: second tap to confirm (DESIGN.md, "Confirm delete") -->
-			<v-btn x-small :text="!armedDelete" :color="armedDelete ? 'error' : undefined" :dark="armedDelete" @click="touchDelete()">
-				{{ armedDelete ? $t('plugins.WorkshopMotors.measure.tap_again_back_to_dc42') : $t('plugins.WorkshopMotors.measure.back_to_dc42_s_table') }}
-			</v-btn>
+			<wf-action-button :action="deleteAction" danger :label="$t('plugins.WorkshopMotors.measure.back_to_dc42_s_table')" :arm-label="$t('plugins.WorkshopMotors.measure.tap_again_back_to_dc42')" @run="deleteAction.run({})" />
 		</div>
 		<references :ceiling="ceiling" :report="report" />
 
@@ -71,7 +69,7 @@
 		<!-- the page was closed or reloaded with the motors still at full current at rest -->
 		<v-alert v-if="idleLeft != null && !prepared" dense outlined type="warning" class="mt-3 mb-0">
 			{{ $t('plugins.WorkshopMotors.measure.idle_left_at_100', { pct: idleLeft }) }}
-			<v-btn x-small color="warning" class="ml-2 black--text" :loading="preparing" :disabled="busy" @click="finishCurrent()">{{ $t('plugins.WorkshopMotors.measure.restore') }}</v-btn>
+			<v-btn small color="warning" class="ml-2 black--text" :loading="preparing" :disabled="busy" @click="finishCurrent()">{{ $t('plugins.WorkshopMotors.measure.restore') }}</v-btn>
 		</v-alert>
 		<v-row dense class="mt-3">
 			<v-col cols="12" sm="4">
@@ -79,9 +77,7 @@
 			</v-col>
 			<v-col cols="12" sm="8" class="d-flex align-center flex-wrap" style="gap:8px">
 				<!-- level 2 (DESIGN.md: heats): double tap -->
-				<v-btn v-if="!prepared" :color="armedPrepare ? 'amber darken-3' : 'primary'" :dark="armedPrepare" small :disabled="!motorChosen || busy || state === 'off'" :loading="preparing" @click="touchPrepare()">
-					{{ armedPrepare ? $t('plugins.WorkshopMotors.measure.tap_again_energize') : $t('plugins.WorkshopMotors.measure.1_energize_at_100') }}
-				</v-btn>
+				<wf-action-button v-if="!prepared" :action="prepareAction" main :label="$t('plugins.WorkshopMotors.measure.1_energize_at_100')" :arm-label="$t('plugins.WorkshopMotors.measure.tap_again_energize')" :disabled="!motorChosen || busy || state === 'off'" @run="prepareAction.run({})" />
 				<v-btn v-else small outlined color="warning" :loading="preparing" @click="finishCurrent()">{{ $t('plugins.WorkshopMotors.measure.finish_idle_reduction_comes_back') }}</v-btn>
 				<span v-if="prepared" class="text-caption success--text">{{ $t('plugins.WorkshopMotors.measure.motors_energized_at_100_no_idle') }}</span>
 			</v-col>
@@ -129,7 +125,11 @@ import { reserveMotion } from './workshop-api.js'
 import { settings } from './settings.js' // shared settings files with revision (vue/_shared): .bak and "another person changed this"
 import { sequenceBlock, withReservation, stoppedFailure } from './sequence.js'
 import OutcomeNote from './OutcomeNote.vue'
-import HelpTip from './HelpTip.vue' // vue/_shared36
+import HelpLine from './HelpLine.vue' // vue/_shared36
+import HelpFold from './HelpFold.vue' // vue/_shared36
+import WfActionButton from './WfActionButton.vue' // vue/_shared36 (FASE2)
+import WfResult from './WfResult.vue' // vue/_shared36 (FASE2)
+import { createAction } from './workshop-action.js' // vue/_shared36 (FASE2)
 
 export const CEILING_FILE = '0:/sys/workshop/config/step-ceiling.json';
 const CORRECTION_FILE = '0:/sys/workshop/config/current.json';
@@ -148,7 +148,6 @@ async function readJson(path, def) {
 // The idle current factor (%) to put back after measuring with a clamp. Kept in the browser while the motors are at
 // 100 %: if the page is closed or reloaded before "Finish", the next visit offers to restore it.
 const IDLE_KEY = 'workshopMotorsIdleOrig';
-const ARMED_MS = 4000;
 
 function readIdleLeft() {
 	try {
@@ -172,7 +171,7 @@ function saveIdleLeft(v) {
 }
 
 export default {
-	components: { HelpTip, References, OutcomeNote },
+	components: { HelpLine, HelpFold, References, OutcomeNote, WfActionButton, WfResult },
 	props: {
 		axes: { type: Array, default: () => [] },
 		state: { type: String, default: '' },
@@ -188,20 +187,16 @@ export default {
 			kUntil: 300,
 			kStep: 25,
 			distT: 300,
-			armedT: false,
-			armedTimer: null,
 			runningT: false,
 			stopT: false,
 			stateT: '',
 			msgT: null,
 			kindT: 'info',
 			restoring: false,
-			armedDelete: false,
 			// current
 			motorSel: null,
 			prepared: false,
 			preparing: false,
-			armedPrepare: false,
 			idleOrig: null,
 			idleLeft: readIdleLeft(),
 			medA: null,
@@ -267,7 +262,21 @@ export default {
 		}
 	},
 	watch: {
-		axisT() { this.disarm(); }
+		axisT() { this.ceilingAction.cancel(); } // an armed measurement does not follow the person to another axis
+	},
+	created() {
+		// the three buttons that need a double touch are writes of the family: arm, ONE request, and what the sequence tells stays as it was
+		this.ceilingAction = createAction({
+			arm: 'double',
+			run: async () => {
+				const mt = sequenceBlock(this.$store.state.machine.model);
+				if (mt) throw Object.assign(new Error(mt), { code: 'sequence_busy' });
+				await this.measureCeiling();
+				return {};
+			}
+		});
+		this.deleteAction = createAction({ arm: 'double', run: async () => { await this.deleteCeiling(); return {}; } });
+		this.prepareAction = createAction({ arm: 'double', run: async () => { await this.prepareCurrent(); return {}; } });
 	},
 	async mounted() {
 		const c = await readJson(CORRECTION_FILE, []);
@@ -275,33 +284,11 @@ export default {
 		if (!this.motorSel && this.motorsList.length) this.motorSel = this.motorsList[0].key;
 	},
 	beforeDestroy() {
-		clearTimeout(this.armedTimer);
-		clearTimeout(this._armedDeleteTimer);
-		clearTimeout(this._armedPrepareTimer);
+		[this.ceilingAction, this.deleteAction, this.prepareAction].forEach(a => a.dispose());
 		if (this.prepared) this.finishCurrent();
 	},
 	methods: {
 		...mapActions('machine', ['sendCode']),
-		disarm() {
-			this.armedT = false;
-			clearTimeout(this.armedTimer);
-		},
-		touchCeiling() {
-			if (!this.armedT) {
-				this.armedT = true;
-				clearTimeout(this.armedTimer);
-				this.armedTimer = setTimeout(() => { this.armedT = false; }, 4000);
-				return;
-			}
-			this.disarm();
-			const mt = sequenceBlock(this.$store.state.machine.model);
-			if (mt) {
-				this.kindT = 'error';
-				this.msgT = mt;
-				return;
-			}
-			this.measureCeiling();
-		},
 		waitfor(ms) {
 			return new Promise(r => setTimeout(r, ms));
 		},
@@ -391,35 +378,12 @@ export default {
 				this.restoring = false;
 			}
 		},
-		// first tap arms for 4 s, the second deletes the measured ceiling
-		touchDelete() {
-			if (!this.armedDelete) {
-				this.armedDelete = true;
-				clearTimeout(this._armedDeleteTimer);
-				this._armedDeleteTimer = setTimeout(() => { this.armedDelete = false; }, ARMED_MS);
-				return;
-			}
-			this.armedDelete = false;
-			clearTimeout(this._armedDeleteTimer);
-			this.deleteCeiling();
-		},
 		async deleteCeiling() {
 			// an empty object is "no measured ceiling" (Motors.vue reads khz_per_motor): the old one stays as .bak
 			await settings.save('step-ceiling', () => ({}));
 			this.$emit('reload');
 		},
 		// --- current ---
-		touchPrepare() {
-			if (!this.armedPrepare) {
-				this.armedPrepare = true;
-				clearTimeout(this._armedPrepareTimer);
-				this._armedPrepareTimer = setTimeout(() => { this.armedPrepare = false; }, ARMED_MS);
-				return;
-			}
-			this.armedPrepare = false;
-			clearTimeout(this._armedPrepareTimer);
-			this.prepareCurrent();
-		},
 		async prepareCurrent() {
 			if (sequenceBlock(this.$store.state.machine.model)) return;
 			this.preparing = true;

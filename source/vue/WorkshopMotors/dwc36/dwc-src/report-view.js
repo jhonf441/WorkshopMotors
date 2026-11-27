@@ -150,6 +150,21 @@ export function driverRows(report, t, powered) {
 	return rows;
 }
 
+// The rows of driverRows() that match a search (the table of every driver in Details): each word of the query is in the id, the board, the
+// axis or the alerts as written; case and accents do not matter. An empty query keeps every row.
+export function rowsMatching(rows, query) {
+	const fold = s => String(s == null ? '' : s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+	const words = fold(query).split(/\s+/).filter(Boolean);
+	const list = rows || [];
+	if (!words.length) {
+		return list;
+	}
+	return list.filter(r => {
+		const hay = fold([r.id, r.board, r.assignedTo, r.faultsText].join(' '));
+		return words.every(w => hay.includes(w));
+	});
+}
+
 // sys/workshop/data/axis-test.csv (written by the axis-test.g macro):
 // date,mode,axis,speed,accel,distance,reps,...,difference -> [{ date, dateShort, mode, axis, speed, accel, dist, reps, dif, ok }]
 // threshold(axis): the step-loss threshold of that axis in mm (AxesTest.vue).

@@ -2,7 +2,7 @@
   "id": "WorkshopMotors",
   "name": "Motors",
   "author": "jhonf441",
-  "version": "2.7.11",
+  "version": "2.10.0",
   "license": "GPL-3.0-or-later",
   "homepage": "https://github.com/jhonf441/WorkshopMotors",
   "tags": [
@@ -25,15 +25,16 @@
     "sys/workshop/macros/axis/axis-test.g",
     "sys/workshop/macros/axis/axis-touch.g",
     "sys/workshop/macros/axis/crash-cal.g",
-    "sys/workshop/macros/axis/step-ceiling.g"
+    "sys/workshop/macros/axis/step-ceiling.g",
+    "sys/workshop/macros/macros.WorkshopMotors.json"
   ],
   "dsfFiles": [
     "permissions.json"
   ],
   "dwcFiles": [
-    "css/WorkshopMotors.ca1d1001.css",
-    "css/WorkshopMotors.ca1d1001.css.gz",
-    "js/WorkshopMotors.fa7c748f.js",
-    "js/WorkshopMotors.fa7c748f.js.gz"
+    "css/WorkshopMotors.57ccd026.css",
+    "css/WorkshopMotors.57ccd026.css.gz",
+    "js/WorkshopMotors.71b84a7d.js",
+    "js/WorkshopMotors.71b84a7d.js.gz"
   ]
 }

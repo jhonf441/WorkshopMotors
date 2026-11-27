@@ -1,0 +1,42 @@
+{
+ "version": 1,
+ "plugin": "WorkshopMotors",
+ "macros": [
+  {
+   "file": "axis/axis-limits.g",
+   "audience": "internal"
+  },
+  {
+   "file": "axis/axis-measure.g",
+   "audience": "internal"
+  },
+  {
+   "file": "axis/axis-microstep.g",
+   "audience": "internal"
+  },
+  {
+   "file": "axis/axis-move.g",
+   "audience": "internal"
+  },
+  {
+   "file": "axis/axis-probe.g",
+   "audience": "internal"
+  },
+  {
+   "file": "axis/axis-test.g",
+   "audience": "internal"
+  },
+  {
+   "file": "axis/axis-touch.g",
+   "audience": "internal"
+  },
+  {
+   "file": "axis/crash-cal.g",
+   "audience": "internal"
+  },
+  {
+   "file": "axis/step-ceiling.g",
+   "audience": "internal"
+  }
+ ]
+}

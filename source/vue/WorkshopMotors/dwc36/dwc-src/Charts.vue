@@ -1,31 +1,31 @@
 <template>
 	<div>
 		<!-- ===== Charts a eleccion ===== -->
-		<div class="text-subtitle-2 mb-1"><v-icon small class="mr-1">mdi-chart-multiple</v-icon>{{ $t('plugins.WorkshopMotors.common.charts') }}<help-tip :title="$t('plugins.WorkshopMotors.common.charts')">
-			{{ $t('plugins.WorkshopMotors.charts.pick_one_or_several_they_use') }}
-			<br>{{ $t('plugins.WorkshopMotors.charts.pulses_help') }}
-		</help-tip></div>
+		<card-head icon="mdi-chart-multiple" :title="$t('plugins.WorkshopMotors.common.charts')" />
+		<help-line class="mb-2" :text="$t('plugins.WorkshopMotors.charts.pick_short')" />
+		<!-- the period and the layout: segments of 32 in one row that wraps -->
+		<div class="chart-tools">
+			<span class="chart-period">{{ $t('plugins.WorkshopMotors.charts.period') }}</span>
+			<v-btn-toggle v-model="spanMin" mandatory dense color="primary" class="chart-seg">
+				<v-btn v-for="r in SPANS" :key="r" small :value="r">{{ r < 60 ? r + ' min' : '1 h' }}</v-btn>
+			</v-btn-toggle>
+			<v-btn-toggle v-model="columns" mandatory dense color="primary" class="chart-seg">
+				<v-btn small :value="1" :title="$t('plugins.WorkshopMotors.charts.one_per_row')" :aria-label="$t('plugins.WorkshopMotors.charts.one_per_row')"><v-icon small>mdi-view-agenda-outline</v-icon></v-btn>
+				<v-btn small :value="2" :title="$t('plugins.WorkshopMotors.charts.two_per_row')" :aria-label="$t('plugins.WorkshopMotors.charts.two_per_row')"><v-icon small>mdi-view-grid-outline</v-icon></v-btn>
+			</v-btn-toggle>
+		</div>
 		<v-autocomplete
 			v-model="sel" :items="itemsSelector" item-text="name" item-value="id" multiple chips small-chips deletable-chips
 			dense outlined hide-details clearable :label="$t('plugins.WorkshopMotors.charts.charts_to_show')" :no-data-text="$t('plugins.WorkshopMotors.charts.waiting_for_data_from_the_service')"
 		/>
-		<div class="d-flex flex-wrap align-center mt-2" style="gap:6px">
-			<v-btn x-small outlined @click="addKind(['cruise', 'speed'])">{{ $t('plugins.WorkshopMotors.charts.speed_of_all') }}</v-btn>
-			<v-btn x-small outlined @click="addKind('current')">{{ $t('plugins.WorkshopMotors.charts.current_of_all') }}</v-btn>
-			<v-btn x-small outlined @click="addKind('sg')">{{ $t('plugins.WorkshopMotors.charts.stallguard_of_all') }}</v-btn>
-			<v-btn x-small outlined @click="addQuick('pulses')">{{ $t('plugins.WorkshopMotors.charts.pulses_of_all') }}</v-btn>
-			<v-btn x-small outlined @click="addKind(['boardPulses', 'hiccups', 'vin', 'boardTemp'])">{{ $t('plugins.WorkshopMotors.charts.board_series') }}</v-btn>
-			<v-btn x-small outlined @click="addTodo()">{{ $t('plugins.WorkshopMotors.charts.all') }}</v-btn>
-			<v-btn x-small text @click="sel = []">{{ $t('plugins.WorkshopMotors.charts.remove_all') }}</v-btn>
-			<v-spacer />
-			<span class="text-caption grey--text">{{ $t('plugins.WorkshopMotors.charts.period') }}</span>
-			<v-btn-toggle v-model="spanMin" mandatory dense color="primary">
-				<v-btn v-for="r in SPANS" :key="r" x-small :value="r">{{ r < 60 ? r + ' min' : '1 h' }}</v-btn>
-			</v-btn-toggle>
-			<v-btn-toggle v-model="columns" mandatory dense color="primary">
-				<v-btn x-small :value="1" :title="$t('plugins.WorkshopMotors.charts.one_per_row')"><v-icon x-small>mdi-view-agenda-outline</v-icon></v-btn>
-				<v-btn x-small :value="2" :title="$t('plugins.WorkshopMotors.charts.two_per_row')"><v-icon x-small>mdi-view-grid-outline</v-icon></v-btn>
-			</v-btn-toggle>
+		<div class="d-flex flex-wrap align-center mt-2" style="gap:8px">
+			<v-btn small outlined @click="addKind(['cruise', 'speed'])">{{ $t('plugins.WorkshopMotors.charts.speed_of_all') }}</v-btn>
+			<v-btn small outlined @click="addKind('current')">{{ $t('plugins.WorkshopMotors.charts.current_of_all') }}</v-btn>
+			<v-btn small outlined @click="addKind('sg')">{{ $t('plugins.WorkshopMotors.charts.stallguard_of_all') }}</v-btn>
+			<v-btn small outlined @click="addQuick('pulses')">{{ $t('plugins.WorkshopMotors.charts.pulses_of_all') }}</v-btn>
+			<v-btn small outlined @click="addKind(['boardPulses', 'hiccups', 'vin', 'boardTemp'])">{{ $t('plugins.WorkshopMotors.charts.board_series') }}</v-btn>
+			<v-btn small outlined @click="addTodo()">{{ $t('plugins.WorkshopMotors.charts.all') }}</v-btn>
+			<v-btn small text @click="sel = []">{{ $t('plugins.WorkshopMotors.charts.remove_all') }}</v-btn>
 		</div>
 		<div v-if="missingSteps.length" class="text-caption grey--text mt-1">
 			{{ $t('plugins.WorkshopMotors.charts.pulses_missing_steps', { names: missingSteps.join(', ') }) }}
@@ -44,7 +44,7 @@
 						<span v-if="g.summary" class="text-caption">
 							{{ $t('plugins.WorkshopMotors.charts.max') }} <b>{{ fmt(g.summary.max) }}</b> &middot; {{ $t('plugins.WorkshopMotors.charts.min_avg', { min: fmt(g.summary.min), avg: fmt(g.summary.avg) }) }}
 						</span>
-						<v-btn x-small icon :title="$t('plugins.WorkshopMotors.charts.remove')" @click="remove(g.serial.id)"><v-icon x-small>mdi-close</v-icon></v-btn>
+						<v-btn small icon :title="$t('plugins.WorkshopMotors.charts.remove')" :aria-label="$t('plugins.WorkshopMotors.charts.remove')" @click="remove(g.serial.id)"><v-icon small>mdi-close</v-icon></v-btn>
 					</div>
 					<div class="text-caption grey--text">
 						{{ g.serial.note }}<span v-if="g.serial.limit"> &middot; <span class="chart-dash" :style="{ borderColor: REFERENCE_COLOR }" /> {{ g.serial.limitText }}</span>
@@ -64,11 +64,12 @@
 			</v-col>
 		</v-row>
 
-		<!-- faults of the drivers in the period: events (when they started and ended), not a curve -->
-		<div class="text-subtitle-2 mt-4 mb-1"><v-icon small class="mr-1">mdi-alert-outline</v-icon>{{ $t('plugins.WorkshopMotors.charts.alerts_in_the_period') }}</div>
+		<!-- faults of the drivers in the period: events (when they started and ended), not a curve; a group of the card, a table of rows of 40 -->
+		<section class="wf-group wf-group-divided">
+		<h4 class="wf-group-title chart-gtitle"><v-icon small class="chart-gicon">mdi-alert-outline</v-icon>{{ $t('plugins.WorkshopMotors.charts.alerts_in_the_period') }}</h4>
 		<div v-if="!alertRows.length" class="text-caption grey--text">{{ $t('plugins.WorkshopMotors.charts.no_alerts_in_period') }}</div>
 		<div v-else class="table-scroll">
-			<v-simple-table dense>
+			<table class="wf-table">
 				<thead>
 					<tr>
 						<th>{{ $t('plugins.WorkshopMotors.charts.alert_since') }}</th><th>{{ $t('plugins.WorkshopMotors.charts.alert_until') }}</th>
@@ -81,17 +82,17 @@
 						<td>{{ a.until ? hourShort(a.until) : $t('plugins.WorkshopMotors.charts.alert_ongoing') }}</td>
 						<td>{{ a.driver }}</td>
 						<td>{{ a.axis }}</td>
-						<td><v-icon x-small :color="a.severity" class="mr-1">{{ a.severity === 'error' ? 'mdi-alert-octagon' : 'mdi-alert' }}</v-icon>{{ faultLabel(a.key) }}</td>
+						<td><span class="wf-chip wf-state" :class="a.severity === 'error' ? 'err' : 'warn'">{{ faultLabel(a.key) }}</span></td>
 					</tr>
 				</tbody>
-			</v-simple-table>
+			</table>
 		</div>
+		</section>
 
 		<!-- ===== Reporte avanzado ===== -->
-		<v-divider class="my-4" />
-		<div class="text-subtitle-2 mb-1"><v-icon small class="mr-1">mdi-file-chart-outline</v-icon>{{ $t('plugins.WorkshopMotors.charts.advanced_report_of_all_motors') }}<help-tip :title="$t('plugins.WorkshopMotors.charts.advanced_report_of_all_motors')">
-			{{ $t('plugins.WorkshopMotors.charts.report_intro', { period: spanMin < 60 ? spanMin + ' min' : '1 h' }) }}
-		</help-tip></div>
+		<section class="wf-group wf-group-divided">
+		<h4 class="wf-group-title chart-gtitle"><v-icon small class="chart-gicon">mdi-file-chart-outline</v-icon>{{ $t('plugins.WorkshopMotors.charts.advanced_report_of_all_motors') }}</h4>
+		<help-line class="mb-2" :text="$t('plugins.WorkshopMotors.charts.report_intro', { period: spanMin < 60 ? spanMin + ' min' : '1 h' })" />
 		<div class="d-flex flex-wrap align-center" style="gap:8px">
 			<v-btn small color="primary" :loading="reading" :disabled="reading" @click="generate()">
 				<v-icon left small>mdi-file-search-outline</v-icon>{{ $t('plugins.WorkshopMotors.charts.generate_report') }}
@@ -111,13 +112,13 @@
 				<v-chip small outlined>{{ rep.machine.board || $t('plugins.WorkshopMotors.charts.board_lower') }}{{ rep.machine.firmware ? ' · RRF ' + rep.machine.firmware : '' }}</v-chip>
 				<v-chip small outlined>{{ $t('plugins.WorkshopMotors.charts.n_motors_n_drivers', { m: rep.motors.length, d: totalDrivers }) }}</v-chip>
 				<v-chip small outlined :color="rep.alerts.length ? 'warning' : 'success'">
-					<v-icon x-small left>{{ rep.alerts.length ? 'mdi-alert' : 'mdi-check' }}</v-icon>{{ $t('plugins.WorkshopMotors.charts.n_alerts_in_period', { n: rep.alerts.length }) }}
+					<v-icon small left>{{ rep.alerts.length ? 'mdi-alert' : 'mdi-check' }}</v-icon>{{ $t('plugins.WorkshopMotors.charts.n_alerts_in_period', { n: rep.alerts.length }) }}
 				</v-chip>
 				<v-chip v-if="withoutResponse" small outlined color="warning">{{ $t('plugins.WorkshopMotors.charts.n_commands_no_reply', { n: withoutResponse }) }}</v-chip>
 				<span class="text-caption grey--text align-self-center">{{ $t('plugins.WorkshopMotors.charts.generated_at', { time: hourShort(rep.generated) }) }}</span>
 			</div>
 			<div class="table-scroll mt-2">
-				<v-simple-table dense>
+				<table class="wf-table">
 					<thead>
 						<tr>
 							<th>{{ $t('plugins.WorkshopMotors.common.motor') }}</th><th>{{ $t('plugins.WorkshopMotors.common.driver') }}</th><th>{{ $t('plugins.WorkshopMotors.charts.microstepping') }}</th><th>{{ $t('plugins.WorkshopMotors.charts.steps_mm') }}</th><th>{{ $t('plugins.WorkshopMotors.common.current') }}</th><th>{{ $t('plugins.WorkshopMotors.common.max_speed') }}</th>
@@ -143,8 +144,8 @@
 								<td>{{ d.stallGuardMin == null ? '--' : d.stallGuardMin }}</td>
 								<td>
 									<span v-if="!d.state" class="grey--text">{{ $t('plugins.WorkshopMotors.common.no_data') }}</span>
-									<v-chip v-else-if="!d.state.alerts.length && !d.state.gstatError" x-small outlined color="success">{{ $t('plugins.WorkshopMotors.charts.ok') }}</v-chip>
-									<v-chip v-for="a in (d.state ? d.state.alerts : [])" :key="a" x-small outlined color="warning" class="mr-1">{{ faultLabel(a) }}</v-chip>
+									<span v-else-if="!d.state.alerts.length && !d.state.gstatError" class="wf-chip wf-state ok">{{ $t('plugins.WorkshopMotors.charts.ok') }}</span>
+									<span v-for="a in (d.state ? d.state.alerts : [])" :key="a" class="wf-chip wf-state warn mr-1">{{ faultLabel(a) }}</span>
 								</td>
 								<td>
 									<span v-if="!d.alerts.length" class="grey--text">{{ $t('plugins.WorkshopMotors.charts.none') }}</span>
@@ -153,10 +154,16 @@
 							</tr>
 						</template>
 					</tbody>
-				</v-simple-table>
+				</table>
 			</div>
 			<div class="text-caption grey--text mt-1">{{ $t('plugins.WorkshopMotors.charts.speeds_in_mm_min_acceleration_in') }}</div>
 		</template>
+		</section>
+		<!-- the one fold of the section, at its foot (FAMILIA-REDISENO 3) -->
+		<help-fold class="mt-3">
+			<p>{{ $t('plugins.WorkshopMotors.charts.pick_one_or_several_they_use') }}</p>
+			<p>{{ $t('plugins.WorkshopMotors.charts.pulses_help') }}</p>
+		</help-fold>
 	</div>
 </template>
 
@@ -173,7 +180,9 @@ import { ts } from './shared-t.js'
 import { historyOf, R } from './record.js'
 import { faultLabel } from './faults.js'
 import { seriesColor, REFERENCE_COLOR } from './chart-data.js'
-import HelpTip from './HelpTip.vue' // vue/_shared36
+import HelpLine from './HelpLine.vue' // vue/_shared36
+import HelpFold from './HelpFold.vue' // vue/_shared36
+import CardHead from './CardHead.vue' // vue/_shared36
 
 const SEL_KEY = 'workshopMotorsChartSel';
 const SPAN_KEY = 'workshopMotorsChartSpan';
@@ -204,7 +213,7 @@ function withTime(p, ms) {
 }
 
 export default {
-	components: { HelpTip, DetailChart },
+	components: { HelpLine, HelpFold, CardHead, DetailChart },
 	props: {
 		report: { type: Object, default: null },
 		om: { type: Object, default: null },
@@ -397,8 +406,32 @@ export default {
 </script>
 
 <style scoped>
+/* the period and the layout of the charts: segments of 32, in a row that wraps */
+.chart-tools {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 8px;
+}
+.chart-period {
+	font-size: 12px;
+	opacity: 0.75;
+}
+.chart-seg >>> .v-btn {
+	min-height: var(--wf-size-s, 32px);
+	height: var(--wf-size-s, 32px) !important;
+}
+.chart-gtitle {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+.chart-gicon {
+	color: var(--wf-icon) !important;
+}
 .chart-card {
-	border: 1px solid rgba(128, 128, 128, 0.2);
+	border: 1px solid var(--wf-line, rgba(128, 128, 128, 0.2));
 	border-radius: 8px;
 	padding: 6px 10px 4px;
 }

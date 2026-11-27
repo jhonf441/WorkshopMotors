@@ -7,9 +7,9 @@
 			<b>{{ $t('plugins.WorkshopMotors.crashFinal.intro_badly_calibrated') }}</b> {{ $t('plugins.WorkshopMotors.crashFinal.intro_4') }}
 		</div>
 
-		<v-alert v-if="pending" dense type="warning" class="mt-3 mb-0">
+		<v-alert v-if="pending" dense text type="warning" class="mt-3 mb-0">
 			{{ $t('plugins.WorkshopMotors.crashFinal.previous_test_interrupted', { text: pending.text }) }}
-			<v-btn x-small color="warning" class="ml-2 black--text" :loading="restoring" @click="restorePending()">{{ $t('plugins.WorkshopMotors.common.restore_now') }}</v-btn>
+			<v-btn small depressed color="primary" class="ml-2" :loading="restoring" @click="restorePending()">{{ $t('plugins.WorkshopMotors.common.restore_now') }}</v-btn>
 		</v-alert>
 
 		<!-- Eje -->
@@ -25,7 +25,7 @@
 			<v-chip v-for="d in axis.drivers" :key="'m' + d.id" small outlined>
 				{{ d.id }}: {{ modes[d.id] || $t('plugins.WorkshopMotors.crashFinal.mode') }}{{ origM915[d.id] ? ' · M915 S' + origM915[d.id].s + ' H' + origM915[d.id].h : '' }}
 			</v-chip>
-			<v-btn x-small text :loading="readingDrivers" :disabled="running" @click="readDrivers()">{{ $t('plugins.WorkshopMotors.crashFinal.read_again') }}</v-btn>
+			<v-btn small text :loading="readingDrivers" :disabled="running" @click="readDrivers()">{{ $t('plugins.WorkshopMotors.crashFinal.read_again') }}</v-btn>
 		</div>
 		<v-alert v-if="axis && isVertical" dense outlined type="warning" class="mt-2 mb-0">
 			{{ $t('plugins.WorkshopMotors.crashFinal.looks_vertical', { axis: axis.letter }) }}
@@ -49,8 +49,8 @@
 				</v-col>
 				<v-col cols="6" sm="4">
 					<v-btn-toggle class="ec-wrap" v-model="end" mandatory dense color="primary">
-						<v-btn x-small :value="1" :disabled="running">{{ $t('plugins.WorkshopMotors.crashFinal.low_end_btn', { axis: axis.letter }) }}</v-btn>
-						<v-btn x-small :value="2" :disabled="running">{{ $t('plugins.WorkshopMotors.crashFinal.high_end_btn', { axis: axis.letter }) }}</v-btn>
+						<v-btn small :value="1" :disabled="running">{{ $t('plugins.WorkshopMotors.crashFinal.low_end_btn', { axis: axis.letter }) }}</v-btn>
+						<v-btn small :value="2" :disabled="running">{{ $t('plugins.WorkshopMotors.crashFinal.high_end_btn', { axis: axis.letter }) }}</v-btn>
 					</v-btn-toggle>
 				</v-col>
 				<v-col cols="6" sm="3">
@@ -61,14 +61,14 @@
 				</v-col>
 				<v-col cols="6" sm="3">
 					<v-btn-toggle class="ec-wrap" v-model="f" mandatory dense color="primary">
-						<v-btn x-small :value="0" :disabled="running" :title="$t('plugins.WorkshopMotors.crashFinal.one_reading_per_full_step_detects')">F0</v-btn>
-						<v-btn x-small :value="1" :disabled="running" :title="$t('plugins.WorkshopMotors.crashFinal.one_reading_every_4_steps_fewer')">F1</v-btn>
+						<v-btn small :value="0" :disabled="running" :title="$t('plugins.WorkshopMotors.crashFinal.one_reading_per_full_step_detects')">F0</v-btn>
+						<v-btn small :value="1" :disabled="running" :title="$t('plugins.WorkshopMotors.crashFinal.one_reading_every_4_steps_fewer')">F1</v-btn>
 					</v-btn-toggle>
 				</v-col>
 				<v-col v-if="axis.drivers.length > 1" cols="6" sm="3">
 					<v-btn-toggle class="ec-wrap" v-model="kindFinal" mandatory dense color="primary">
-						<v-btn x-small value="S3" :disabled="running" :title="$t('plugins.WorkshopMotors.crashFinal.stops_all_motors_of_the_axis')">S3</v-btn>
-						<v-btn x-small value="S4" :disabled="running" :title="$t('plugins.WorkshopMotors.crashFinal.each_motor_stops_on_its_own')">S4</v-btn>
+						<v-btn small value="S3" :disabled="running" :title="$t('plugins.WorkshopMotors.crashFinal.stops_all_motors_of_the_axis')">S3</v-btn>
+						<v-btn small value="S4" :disabled="running" :title="$t('plugins.WorkshopMotors.crashFinal.each_motor_stops_on_its_own')">S4</v-btn>
 					</v-btn-toggle>
 				</v-col>
 			</v-row>
@@ -76,7 +76,7 @@
 
 			<div class="ec-chips d-flex flex-wrap mt-2" style="gap:6px">
 				<v-chip v-for="r in reqs" :key="r.key" small :color="r.ok ? 'success' : (r.blocks ? 'error' : 'warning')" outlined>
-					<v-icon x-small left>{{ r.ok ? 'mdi-check' : 'mdi-close' }}</v-icon>{{ r.text }}
+					<v-icon small left>{{ r.ok ? 'mdi-check' : 'mdi-close' }}</v-icon>{{ r.text }}
 				</v-chip>
 			</div>
 
@@ -113,7 +113,7 @@
 
 			<div v-if="steps.length" class="mt-3">
 				<div v-for="(p, i) in steps" :key="i" class="text-body-2">
-					<v-icon x-small :color="p.color" class="mr-1">{{ p.icon }}</v-icon>{{ p.text }}
+					<v-icon small :color="p.color" class="mr-1">{{ p.icon }}</v-icon>{{ p.text }}
 				</div>
 			</div>
 
@@ -181,7 +181,7 @@
 				</div>
 				<v-alert v-if="savedMsg" dense outlined type="success" class="mt-2 mb-0">
 					{{ savedMsg }}
-					<v-btn x-small outlined class="ml-2" :loading="applying" :disabled="blocked" @click="applyNow()">{{ $t('plugins.WorkshopMotors.crashFinal.apply_now_without_restarting') }}</v-btn>
+					<v-btn small outlined class="ml-2" :loading="applying" :disabled="blocked" @click="applyNow()">{{ $t('plugins.WorkshopMotors.crashFinal.apply_now_without_restarting') }}</v-btn>
 				</v-alert>
 				<div class="text-caption mt-3">{{ $t('plugins.WorkshopMotors.crashFinal.homing_file_hint', { axis: axis.letter, file: 'sys/home' + axis.letter.toLowerCase() + '.g' }) }}</div>
 				<pre class="homing">{{ textHoming }}</pre>
